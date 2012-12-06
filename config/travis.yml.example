@@ -1,0 +1,6 @@
+blue_box:
+  customer_id: 12345
+  api_key: 'abcde'
+  location_id: '1-2-3-4-5'
+  image_id:    '1-2-3-4-5'
+  flavor_id:   '1-2-3-4-5'
