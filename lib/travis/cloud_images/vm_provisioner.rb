@@ -48,7 +48,7 @@ RUBY
           'rm -rf travis-cookbooks',
           'git clone -b bluebox git://github.com/travis-ci/travis-cookbooks.git --depth 10',
         ]
-        
+
         CLEAN_UP = [
           'rm -rf /tmp/vm-provisioning'
         ]
@@ -122,7 +122,7 @@ RUBY
         }
 
         box_config['json'] ||= {}
-        
+
         attributes = box_config['json'].merge(build_env)
 
         attributes.merge('run_list' => create_run_list(box_config))
@@ -134,7 +134,7 @@ RUBY
           "sudo chef-solo -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
         ])
       end
-      
+
       def clean_up
         run_commands(Commands::CLEAN_UP)
       end

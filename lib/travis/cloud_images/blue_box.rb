@@ -65,7 +65,7 @@ module Travis
       def clean_up
         connection.servers.each { |server| server.destroy if ['running', 'error'].include?(server.state) }
       end
-      
+
       def config
         @config ||= Config.new.blue_box
       end
