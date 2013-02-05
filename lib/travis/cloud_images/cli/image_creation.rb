@@ -2,7 +2,9 @@ require 'travis/cloud_images/config'
 require 'travis/cloud_images/blue_box'
 require 'travis/cloud_images/vm_provisioner'
 require 'thor'
+require 'digest'
 require 'digest/sha1'
+require 'openssl'
 require 'securerandom'
 
 $stdout.sync = true
@@ -14,33 +16,36 @@ module Travis
         namespace "travis:images"
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
+        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def create(image_type = "standard")
           puts "\nAbout to create and provision #{image_type} template\n\n"
-          
+
           password = generate_password
-          
+
           opts = { :hostname => "provisioning.#{image_type}" }
-          
+
           unless standard_image?(image_type)
             opts[:image_id] = blue_box.latest_template('standard')['id']
           end
-          
+
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
-          
-          server = blue_box.create_server(password, opts)
-          
+
+          opts[:password] = password
+
+          server = blue_box.create_server(opts)
+
           puts "VM created : "
           puts "  #{server.inspect}\n\n"
-          
+
           puts "About to provision the VM using the credential:"
           puts "  travis@#{server.ips.first['address']} #{password}\n\n"
-          
+
           provisioner = VmProvisoner.new(server.ips.first['address'], 'travis', password, image_type)
-          
+
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-          result = provisioner.full_run
+          result = provisioner.full_run(!standard_image?(image_type))
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
-          
+
           if result
             blue_box.save_template(server, image_type)
             server.destroy
@@ -48,67 +53,100 @@ module Travis
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
           end
-          
+
           puts "#{server.hostname} VM destroyed"
         end
 
+
         desc 'boot [IMAGE_TYPE]', 'Boot a VM for testing, defaults to "ruby"'
+        method_option :name, :aliases => '-n', :desc => 'additional naming option as to help idenify booted instances'
+        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def boot(image_type = 'ruby')
           password = generate_password
-          
-          opts = { 
-            :hostname => "testing.#{image_type}.#{Time.now.to_i}",
+
+          name_addition = [options[:name], image_type].join('-')
+
+          hostname = "debug-#{name_addition}-#{Time.now.to_i}"
+
+          opts = {
+            :hostname => hostname,
             :image_id => blue_box.latest_template(image_type)['id']
           }
-          
+
           puts "\nCreating a vm with the following options:"
           puts "  #{opts.inspect}\n\n"
-          
-          server = blue_box.create_server(password, opts)
-          
+
+          opts[:password] = password
+
+          server = blue_box.create_server(opts)
+
           puts "VM created:"
           puts " #{server.inspect}\n\n"
-          
+
           puts "Connection details are:"
-          puts "  travis@#{server.ips.first['address']}"
-          puts "  password: #{password}\n\n"
+          puts "  ssh travis@#{server.ips.first['address']}"
+          puts "  password: #{password}"
         end
-        
+
+
         desc 'destroy [NAME]', 'Destroy the VM named [NAME] used for testing'
+        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def destroy(name)
-          server = blue_box.servers.detect { |s| s.hostname =~ /^#{name}/ }
-          
-          server.destroy
-          
-          puts "VM '#{name}' destroyed"
+          servers_with_name(name).each do |server|
+            server.destroy
+            puts "VM '#{server.hostname}' destroyed"
+          end
         end
-        
-        desc 'generate_password', 'Generates a mostly unique password'
-        def generate_password
-          SecureRandom.urlsafe_base64(40)
-        end
-        
+
+
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
+        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def clean_up
-          servers = blue_box.servers.find_all { |s| s.hostname =~ /^provisioning./ }
-          
+          servers = servers_with_name("provisioning.")
+
           destroyed = servers.map do |s|
             s.destroy
             puts "VM '#{s.hostname}' destroyed"
             s
           end
-          
+
           puts "\n #{destroyed.size} provisioning VMs destroyed\n\n"
         end
-        
-        private
-        
-        def blue_box
-          @blue_box ||= BlueBox.new
+
+
+        desc 'list [TYPE]', "Lists all the currently active VM's running, default is 'all'"
+        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
+        def list(type = 'all')
+          servers = blue_box.servers
+
+          servers.sort! { |a,b| a.hostname <=> b.hostname }
+
+          printf("%-30s %s\n", "Hostname", "State")
+          print("----------------------------------------\n")
+
+          servers.each do |server|
+            name = server.hostname.gsub(/\.\w+\.blueboxgrid\.com/, '')
+            #puts server.inspect
+            printf("%-30s %s\n", name, server.state)
+          end
         end
-        
+
+        private
+
+        def blue_box
+          @blue_box ||= BlueBox.new(options["account"])
+        end
+
+        def generate_password
+          Digest::SHA1.base64digest(OpenSSL::Random.random_bytes(30)).gsub(/[\&\+\/\=\\]/, '')[0..19]
+        end
+
         def standard_image?(image_type)
           image_type == 'standard'
+        end
+
+        def servers_with_name(name)
+          blue_box.servers.find_all { |s| s.hostname =~ /^#{name}/ }
         end
 
       end

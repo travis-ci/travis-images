@@ -4,6 +4,12 @@ require 'shellwords'
 module Travis
   module CloudImages
     class BlueBox
+      attr_reader :account
+
+      def initialize(account)
+        @account = account
+      end
+
       # create a connection
       def connection
         @connection ||= Fog::Compute.new(
@@ -17,15 +23,13 @@ module Travis
         connection.servers
       end
 
-      def create_server(password, opts = {})
+      def create_server(opts = {})
         defaults = {
-          :username  => 'travis',
-          :password  => password,
-          :image_id  => config.image_id,
-          :flavor_id => config.flavor_id,
+          :username    => 'travis',
+          :image_id    => config.image_id,
+          :flavor_id   => config.flavor_id,
           :location_id => config.location_id
         }
-        defaults.delete(:image_id) if opts[:template_id]
         server = connection.servers.create(defaults.merge(opts))
         server.wait_for { ready? }
         server
@@ -65,9 +69,9 @@ module Travis
       def clean_up
         connection.servers.each { |server| server.destroy if ['running', 'error'].include?(server.state) }
       end
-      
+
       def config
-        @config ||= Config.new.blue_box
+        @config ||= Config.new.blue_box[account.to_s]
       end
     end
   end

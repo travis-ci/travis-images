@@ -21,8 +21,8 @@ RUBY
         SETUP_ENV = [
           'sudo usermod -s /bin/bash travis',
           'sudo apt-get -y update',
-          'sudo apt-get -y upgrade',
-          'sudo apt-get -y install git-core curl build-essential bison openssl libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libxml2-dev libxslt1-dev autoconf libc6-dev libncurses5-dev vim wget',
+          'sudo apt-get -y -qq upgrade',
+          'sudo apt-get -y -qq install git-core curl build-essential bison openssl libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libxml2-dev libxslt1-dev autoconf libc6-dev libncurses5-dev vim wget',
           'sudo rm /dev/null',
           'sudo mknod -m 0666 /dev/null c 1 3',
           'sudo apt-get -y install --reinstall language-pack-en',
@@ -48,9 +48,11 @@ RUBY
           'rm -rf travis-cookbooks',
           'git clone -b bluebox git://github.com/travis-ci/travis-cookbooks.git --depth 10',
         ]
-        
+
         CLEAN_UP = [
-          'rm -rf /tmp/vm-provisioning'
+          'cd ~',
+          'rm -rf /tmp/vm-provisioning',
+          'sudo apt-get clean'
         ]
       end
 
@@ -81,7 +83,10 @@ RUBY
         simple_output = block_given? ? block : lambda { |ch, data| log << data; print(data) }
 
         status = nil
-        shell.execute("echo #{Shellwords.escape("$ #{command}")}\n#{command}") do |process|
+
+        print("$ #{command}\n")
+
+        shell.execute(command) do |process|
           process.on_output(&simple_output)
           process.on_error_output(&simple_output)
           process.on_finish { |p| status = p.exit_status }
@@ -113,19 +118,9 @@ RUBY
       def updated_run_list
         box_config = fetch_box_config
 
-        build_env = {
-          'travis_build_environment' => {
-            'user' => 'travis',
-            'group' => 'travis',
-            'home' => "/home/travis"
-          }
-        }
-
         box_config['json'] ||= {}
-        
-        attributes = box_config['json'].merge(build_env)
 
-        attributes.merge('run_list' => create_run_list(box_config))
+        box_config['json'].merge('run_list' => create_run_list(box_config))
       end
 
       def run_chef
@@ -134,14 +129,14 @@ RUBY
           "sudo chef-solo -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
         ])
       end
-      
+
       def clean_up
         run_commands(Commands::CLEAN_UP)
       end
 
-      def full_run
+      def full_run(skip_chef = false)
         setup_env &&
-        install_chef &&
+        (skip_chef || install_chef) &&
         prep_chef &&
         run_chef &&
         clean_up
