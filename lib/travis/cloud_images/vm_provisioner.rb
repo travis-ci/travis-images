@@ -37,7 +37,7 @@ RUBY
           'cd ruby-build',
           'sudo ./install.sh',
           'sudo ruby-build 1.9.3-p327 /usr/local',
-          'sudo gem install chef --quiet --no-ri --no-rdoc',
+          'sudo gem install chef --version=10.20.0 --quiet --no-ri --no-rdoc',
           'sudo gem install ruby-shadow --quiet --no-ri --no-rdoc',
         ]
 
