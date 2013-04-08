@@ -1,5 +1,6 @@
 require 'travis/cloud_images/config'
 require 'travis/cloud_images/blue_box'
+require 'travis/cloud_images/sauce_labs'
 require 'travis/cloud_images/vm_provisioner'
 require 'thor'
 require 'digest'
@@ -15,6 +16,8 @@ module Travis
       class ImageCreation < Thor
         namespace "travis:images"
 
+        class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
+
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def create(image_type = "standard")
@@ -25,29 +28,29 @@ module Travis
           opts = { :hostname => "provisioning.#{image_type}" }
 
           unless standard_image?(image_type)
-            opts[:image_id] = blue_box.latest_template('standard')['id']
+            opts[:image_id] = provider.latest_template('standard')['id']
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
 
           opts[:password] = password
 
-          server = blue_box.create_server(opts)
+          server = provider.create_server(opts)
 
           puts "VM created : "
           puts "  #{server.inspect}\n\n"
 
           puts "About to provision the VM using the credential:"
-          puts "  travis@#{server.ips.first['address']} #{password}\n\n"
+          puts "  travis@#{server.ip_address} #{password}\n\n"
 
-          provisioner = VmProvisoner.new(server.ips.first['address'], 'travis', password, image_type)
+          provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
           result = provisioner.full_run(!standard_image?(image_type))
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
-            blue_box.save_template(server, image_type)
+            provider.save_template(server, image_type)
             server.destroy
             puts "#{image_type} template created!\n\n"
           else
@@ -70,7 +73,7 @@ module Travis
 
           opts = {
             :hostname => hostname,
-            :image_id => blue_box.latest_template(image_type)['id']
+            :image_id => provider.latest_template(image_type)['id']
           }
 
           puts "\nCreating a vm with the following options:"
@@ -78,13 +81,13 @@ module Travis
 
           opts[:password] = password
 
-          server = blue_box.create_server(opts)
+          server = provider.create_server(opts)
 
           puts "VM created:"
           puts " #{server.inspect}\n\n"
 
           puts "Connection details are:"
-          puts "  ssh travis@#{server.ips.first['address']}"
+          puts "  ssh travis@#{server.ip_address}"
           puts "  password: #{password}"
         end
 
@@ -117,7 +120,7 @@ module Travis
         desc 'list [TYPE]', "Lists all the currently active VM's running, default is 'all'"
         method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def list(type = 'all')
-          servers = blue_box.servers
+          servers = provider.servers
 
           servers.sort! { |a,b| a.hostname <=> b.hostname }
 
@@ -133,8 +136,12 @@ module Travis
 
         private
 
-        def blue_box
-          @blue_box ||= BlueBox.new(options["account"])
+        def provider
+          @provider ||= provider_class.new(options["account"])
+        end
+
+        def provider_class
+          { 'blue_box' => BlueBox, 'sauce_labs' => SauceLabs }[options["provider"]]
         end
 
         def generate_password
@@ -146,9 +153,8 @@ module Travis
         end
 
         def servers_with_name(name)
-          blue_box.servers.find_all { |s| s.hostname =~ /^#{name}/ }
+          provider.servers.find_all { |s| s.hostname =~ /^#{name}/ }
         end
-
       end
     end
   end
