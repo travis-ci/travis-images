@@ -17,6 +17,10 @@ module Travis
           @server.ips.first['address']
         end
 
+        def state
+          @server.state
+        end
+
         def destroy
           @server.destroy
         end
