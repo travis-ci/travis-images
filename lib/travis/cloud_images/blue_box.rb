@@ -4,6 +4,28 @@ require 'shellwords'
 module Travis
   module CloudImages
     class BlueBox
+      class VirtualMachine
+        def initialize(server)
+          @server = server
+        end
+
+        def hostname
+          @server.hostname
+        end
+
+        def ip_address
+          @server.ips.first['address']
+        end
+
+        def state
+          @server.state
+        end
+
+        def destroy
+          @server.destroy
+        end
+      end
+
       attr_reader :account
 
       def initialize(account)
@@ -20,7 +42,7 @@ module Travis
       end
 
       def servers
-        connection.servers
+        connection.servers.map { |server| VirtualMachine.new(server) }
       end
 
       def create_server(opts = {})
@@ -32,7 +54,7 @@ module Travis
         }
         server = connection.servers.create(defaults.merge(opts))
         server.wait_for { ready? }
-        server
+        VirtualMachine.new(server)
       end
 
       def save_template(server, desc)
