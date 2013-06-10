@@ -17,9 +17,9 @@ module Travis
         namespace "travis:images"
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
+        class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
-        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def create(image_type = "standard")
           puts "\nAbout to create and provision #{image_type} template\n\n"
 
@@ -63,7 +63,7 @@ module Travis
 
         desc 'boot [IMAGE_TYPE]', 'Boot a VM for testing, defaults to "ruby"'
         method_option :name, :aliases => '-n', :desc => 'additional naming option as to help idenify booted instances'
-        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
+        method_option :ipv6, :default => false, :type => :boolean, :desc => 'boot an ipv6 only vm, only supported by bluebox right now'
         def boot(image_type = 'ruby')
           password = generate_password
 
@@ -75,6 +75,8 @@ module Travis
             :hostname => hostname,
             :image_id => provider.latest_template(image_type)['id']
           }
+
+          opts[:ipv6_only] = true if options["ipv6"]
 
           puts "\nCreating a vm with the following options:"
           puts "  #{opts.inspect}\n\n"
@@ -93,7 +95,6 @@ module Travis
 
 
         desc 'destroy [NAME]', 'Destroy the VM named [NAME] used for testing'
-        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def destroy(name)
           servers_with_name(name).each do |server|
             server.destroy
@@ -103,7 +104,6 @@ module Travis
 
 
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
-        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def clean_up
           servers = servers_with_name("provisioning.")
 
@@ -118,7 +118,6 @@ module Travis
 
 
         desc 'list [TYPE]', "Lists all the currently active VM's running, default is 'all'"
-        method_option :account, :aliases => '-a', :default => 'org', :desc => 'which Cloud VM account to use eg. org, pro'
         def list(type = 'all')
           servers = provider.servers
 

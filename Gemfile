@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'fog'
+gem 'fog', github: 'travis-ci/fog'
 gem 'net-ssh-shell'
 gem 'faraday'
 gem 'multi_json'
