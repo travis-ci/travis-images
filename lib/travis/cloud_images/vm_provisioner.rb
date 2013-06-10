@@ -46,7 +46,7 @@ RUBY
           "echo #{Shellwords.escape(Assets::SOLO_RB)} > /tmp/vm-provisioning/assets/solo.rb",
           'cd /tmp/vm-provisioning',
           'rm -rf travis-cookbooks',
-          'git clone -b bluebox git://github.com/travis-ci/travis-cookbooks.git --depth 10',
+          'git clone git://github.com/travis-ci/travis-cookbooks.git --depth 10',
         ]
 
         CLEAN_UP = [
@@ -143,7 +143,7 @@ RUBY
       end
 
       def fetch_box_config
-        response = Faraday.get("https://raw.github.com/travis-ci/travis-boxes/more_separation/config/worker.#{box_type}.yml")
+        response = Faraday.get("https://raw.github.com/travis-ci/travis-boxes/master/config/worker.#{box_type}.yml")
         YAML.load(response.body)
       end
 
