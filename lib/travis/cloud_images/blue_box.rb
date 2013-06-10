@@ -9,6 +9,10 @@ module Travis
           @server = server
         end
 
+        def vm_id
+          @server.id
+        end
+
         def hostname
           @server.hostname
         end
@@ -61,7 +65,7 @@ module Travis
         timestamp = Time.now.utc.strftime('%Y-%m-%d-%H-%M')
         full_desc = "travis-#{desc}-#{timestamp}"
 
-        connection.create_template(server.id, :description => full_desc)
+        connection.create_template(server.vm_id, :description => full_desc)
 
         while !find_template(full_desc)
           sleep(3)
