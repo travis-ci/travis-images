@@ -116,7 +116,7 @@ RUBY
       end
 
       def updated_run_list
-        box_config = fetch_box_config
+        box_config = parse_template_config
 
         box_config['json'] ||= {}
 
@@ -142,9 +142,10 @@ RUBY
         clean_up
       end
 
-      def fetch_box_config
-        response = Faraday.get("https://raw.github.com/travis-ci/travis-boxes/master/config/worker.#{box_type}.yml")
-        YAML.load(response.body)
+      def parse_template_config
+        full_path = File.expand_path("templates/worker.#{box_type}.yml")
+        contents = File.read(full_path)
+        YAML.load(contents)
       end
 
       def create_run_list(box_config)

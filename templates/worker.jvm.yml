@@ -1,0 +1,9 @@
+recipes:
+  - haskell
+  - java::multi
+  - ant
+  - maven3
+  - leiningen
+  - sbt
+  - gradle::tarball
+  - sweeper
