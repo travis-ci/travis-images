@@ -20,6 +20,7 @@ module Travis
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
+        method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
         def create(image_type = "standard")
           puts "\nAbout to create and provision #{image_type} template\n\n"
 
@@ -50,7 +51,8 @@ module Travis
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
-            provider.save_template(server, image_type)
+            desc = [options["name"], image_type].compact.join('-')
+            provider.save_template(server, desc)
             server.destroy
             puts "#{image_type} template created!\n\n"
           else
