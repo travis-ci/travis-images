@@ -106,7 +106,7 @@ module Travis
           end
 
           unless destroyed
-            STDERR.puts "Could not find any VM wih name #{name}, did you mean one of these servers:"
+            STDERR.puts "Could not find any VM matching /^#{name}/, did you mean one of these servers:"
             provider.servers.find_all { |s| p s.hostname if s.hostname =~ /#{Regexp.escape(name)}/ }
             exit 1
           end
