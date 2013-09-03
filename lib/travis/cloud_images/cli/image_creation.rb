@@ -98,9 +98,17 @@ module Travis
 
         desc 'destroy [NAME]', 'Destroy the VM named [NAME] used for testing'
         def destroy(name)
+          destroyed = false
           servers_with_name(name).each do |server|
             server.destroy
             puts "VM '#{server.hostname}' destroyed"
+            destroyed = true
+          end
+
+          unless destroyed
+            STDERR.puts "Could not find VM wih name #{name}, did you mean one of these servers:"
+            provider.servers.find_all { |s| p s.hostname if s.hostname =~ /#{Regexp.escape(name)}/ }
+            exit 1
           end
         end
 
