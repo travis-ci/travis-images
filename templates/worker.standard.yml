@@ -44,7 +44,7 @@ recipes:
   #
   - java
   - ant
-  - maven3
+  - maven
   - leiningen
   - sbt
   - gradle::tarball
@@ -74,7 +74,7 @@ recipes:
   #
   - mysql::server_on_ramfs
   - postgresql
-  - redis::ppa
+  - redis
   - riak
   - mongodb
   - couchdb::ppa
