@@ -7,10 +7,6 @@ json:
       - bundler
       - rake
       - chef
-  mysql:
-    server_root_password: ""
-  postgresql:
-    max_connections: 256
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
@@ -48,7 +44,7 @@ recipes:
   #
   - java
   - ant
-  - maven3
+  - maven
   - leiningen
   - sbt
   - gradle::tarball
@@ -76,11 +72,9 @@ recipes:
   #
   # Data stores
   #
-  - postgresql::client
-  - mysql::client
   - mysql::server_on_ramfs
-  - postgresql::server_on_ramfs
-  - redis::ppa
+  - postgresql
+  - redis
   - riak
   - mongodb
   - couchdb::ppa
