@@ -12,9 +12,6 @@ json:
         check_for: jruby-d19
       - name: ree
       - name: 1.9.2
-        # using commit from https://github.com/ruby/ruby/commit/0b39c8a08d57853af16a1686a10e505ff482e535
-      - name: ruby-head-s0b39c8a08d57853af16a1686a10e505ff482e535
-      - name: jruby-head
       - name: 2.0.0
     gems:
       - bundler
@@ -24,7 +21,6 @@ json:
       jruby-19mode: jruby-d19
       jruby: jruby-19mode
       "2.0": "ruby-2.0.0"
-      ruby-head: ruby-head-s0b39c8a08d57853af16a1686a10e505ff482e535
 recipes:
   - sweeper
   - rvm
