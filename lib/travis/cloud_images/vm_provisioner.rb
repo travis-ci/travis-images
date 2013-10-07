@@ -22,7 +22,7 @@ RUBY
           'sudo usermod -s /bin/bash travis',
           'sudo apt-get -y update',
           'sudo apt-get -y -qq upgrade',
-          'sudo apt-get -y -qq install git-core curl build-essential bison openssl libreadline6 libreadline6-dev zlib1g zlib1g-dev libssl-dev libyaml-dev libxml2-dev libxslt1-dev autoconf libc6-dev libncurses5-dev vim wget',
+          'sudo apt-get -y -qq install git-core curl build-essential bison openssl vim wget',
           'sudo rm /dev/null',
           'sudo mknod -m 0666 /dev/null c 1 3',
           'sudo apt-get -y install --reinstall language-pack-en',
@@ -32,13 +32,7 @@ RUBY
         INSTALL_CHEF = [
           'mkdir -p /tmp/vm-provisioning',
           'cd /tmp/vm-provisioning',
-          'sudo rm -rf ruby-build',
-          'git clone -q git://github.com/sstephenson/ruby-build.git',
-          'cd ruby-build',
-          'sudo ./install.sh',
-          'sudo ruby-build 1.9.3-p327 /usr/local',
-          'sudo gem install chef --version=10.20.0 --quiet --no-ri --no-rdoc',
-          'sudo gem install ruby-shadow --quiet --no-ri --no-rdoc',
+          'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 10.26.0-1'
         ]
 
         PREP_CHEF = [
