@@ -6,7 +6,6 @@ json:
     gems:
       - bundler
       - rake
-      - chef
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
