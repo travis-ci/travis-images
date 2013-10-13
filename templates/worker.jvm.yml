@@ -2,7 +2,7 @@ recipes:
   - haskell
   - java::multi
   - ant
-  - maven3
+  - maven
   - leiningen
   - sbt
   - gradle::tarball
