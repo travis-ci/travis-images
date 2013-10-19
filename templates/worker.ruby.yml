@@ -25,7 +25,7 @@ json:
     alternate_versions:
       - openjdk6
       - openjdk7
-      #- oraclejdk8
+      - oraclejdk8
 recipes:
   - sweeper
   - rvm
