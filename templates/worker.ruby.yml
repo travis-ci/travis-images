@@ -21,9 +21,14 @@ json:
       jruby-19mode: jruby-d19
       jruby: jruby-19mode
       "2.0": "ruby-2.0.0"
+  java:
+    alternate_versions:
+      - openjdk6
+      - openjdk7
+      - oraclejdk8
 recipes:
   - sweeper
   - rvm
   - rvm::multi
-  - java::multi
+  - java
   - sweeper

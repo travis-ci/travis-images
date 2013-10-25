@@ -1,6 +1,12 @@
+json:
+  java:
+    alternate_versions:
+      - openjdk6
+      - openjdk7
+      - oraclejdk8
 recipes:
   - haskell
-  - java::multi
+  - java
   - ant
   - maven
   - leiningen
