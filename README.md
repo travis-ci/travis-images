@@ -8,3 +8,7 @@ Currently only the Blue Box provider is supported, but this may be extended in t
 Many more features are left to be added, and lots more awesome is in the works.
 
 High 5 !
+
+## Reporting Issues
+
+Please report any issues on the [central Travis CI issue tracker](https://github.com/travis-ci/travis-ci/issues).
