@@ -32,7 +32,7 @@ RUBY
         INSTALL_CHEF = [
           'mkdir -p /tmp/vm-provisioning',
           'cd /tmp/vm-provisioning',
-          'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 10.26.0-1'
+          'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 11.8.0-1'
         ]
 
         PREP_CHEF = [
@@ -45,7 +45,7 @@ RUBY
 
         CLEAN_UP = [
           'cd ~',
-          'rm -rf /tmp/vm-provisioning',
+          'sudo rm -rf /tmp/vm-provisioning',
           'sudo apt-get clean'
         ]
       end
