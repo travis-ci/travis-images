@@ -27,7 +27,6 @@ json:
       - openjdk7
       - oraclejdk8
 recipes:
-  - sweeper
   - rvm
   - rvm::multi
   - java
