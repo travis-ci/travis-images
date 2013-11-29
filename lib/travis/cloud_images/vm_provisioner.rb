@@ -129,7 +129,7 @@ RUBY
       end
 
       def full_run(skip_chef = false)
-        setup_env &&
+        (skip_chef || setup_env) &&
         (skip_chef || install_chef) &&
         prep_chef &&
         run_chef &&
