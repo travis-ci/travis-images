@@ -13,6 +13,7 @@ json:
       - name: ree
       - name: 1.9.2
       - name: 2.0.0
+      - name: 2.1.0
     gems:
       - bundler
       - rake
@@ -21,6 +22,7 @@ json:
       jruby-19mode: jruby-d19
       jruby: jruby-19mode
       "2.0": "ruby-2.0.0"
+      "2.1": "ruby-2.1.0"
   java:
     alternate_versions:
       - openjdk6
