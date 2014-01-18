@@ -5,7 +5,6 @@ json:
       - openjdk7
       - oraclejdk8
 recipes:
-  - haskell::multi
   - java
   - ant
   - maven
