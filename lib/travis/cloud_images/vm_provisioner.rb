@@ -129,9 +129,9 @@ RUBY
         run_commands(Commands::CLEAN_UP)
       end
 
-      def full_run(skip_chef = false)
-        (skip_chef || setup_env) &&
-        (skip_chef || install_chef) &&
+      def full_run(skip_setup = false)
+        (skip_setup || setup_env) &&
+        install_chef &&
         prep_chef &&
         run_chef &&
         clean_up
