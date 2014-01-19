@@ -15,18 +15,6 @@ json:
       0.11.10: 0.11
       0.11.10: node-head
     default: 0.10.24
-  golang:
-    multi:
-      versions:
-        - go1.0.3
-        - go1.1.2
-        - go1.2
-      default_version: go1.2
-      aliases:
-        "go1": "go1.0.3"
-        "go1.0": "go1.0.3"
-        "go1.1": "go1.1.2"
 recipes:
   - nodejs::multi
-  - golang::multi
   - sweeper
