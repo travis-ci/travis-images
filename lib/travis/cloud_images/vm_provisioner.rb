@@ -46,6 +46,7 @@ RUBY
         CLEAN_UP = [
           'cd ~',
           'sudo rm -rf /tmp/vm-provisioning',
+          'sudo rm -rf /opt/chef',
           'sudo apt-get clean'
         ]
       end
