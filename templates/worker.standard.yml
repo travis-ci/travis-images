@@ -6,6 +6,12 @@ json:
     gems:
       - bundler
       - rake
+  golang:
+    multi:
+      versions:
+        - go1.2
+      aliases: [] 
+      default_version: go1.2
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
@@ -46,9 +52,6 @@ recipes:
   - java
   - ant
   - maven
-  - leiningen
-  - sbt
-  - gradle::tarball
   #
   # Needs to be installed before RVM
   #

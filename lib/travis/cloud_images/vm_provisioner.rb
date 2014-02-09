@@ -22,7 +22,7 @@ RUBY
           'sudo usermod -s /bin/bash travis',
           'sudo apt-get -y update',
           'sudo apt-get -y -qq upgrade',
-          'sudo apt-get -y -qq install git-core curl build-essential bison openssl vim wget',
+          'sudo apt-get -y -qq install curl build-essential bison openssl vim wget',
           'sudo rm /dev/null',
           'sudo mknod -m 0666 /dev/null c 1 3',
           'sudo apt-get -y install --reinstall language-pack-en',
@@ -40,12 +40,16 @@ RUBY
           "echo #{Shellwords.escape(Assets::SOLO_RB)} > /tmp/vm-provisioning/assets/solo.rb",
           'cd /tmp/vm-provisioning',
           'rm -rf travis-cookbooks',
-          'git clone git://github.com/travis-ci/travis-cookbooks.git --depth 10',
+          'curl -L https://api.github.com/repos/travis-ci/travis-cookbooks/tarball > travis-cookbooks.tar.gz',
+          'tar xvf travis-cookbooks.tar.gz',
+          'mv travis-ci-travis-cookbooks-* travis-cookbooks',
+          'rm travis-cookbooks.tar.gz'
         ]
 
         CLEAN_UP = [
           'cd ~',
           'sudo rm -rf /tmp/vm-provisioning',
+          'sudo rm -rf /opt/chef',
           'sudo apt-get clean'
         ]
       end
@@ -128,9 +132,9 @@ RUBY
         run_commands(Commands::CLEAN_UP)
       end
 
-      def full_run(skip_chef = false)
-        (skip_chef || setup_env) &&
-        (skip_chef || install_chef) &&
+      def full_run(skip_setup = false)
+        (skip_setup || setup_env) &&
+        install_chef &&
         prep_chef &&
         run_chef &&
         clean_up
