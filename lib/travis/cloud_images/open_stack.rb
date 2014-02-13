@@ -21,6 +21,10 @@ module Travis
           @server.addresses.values.flatten.detect { |x| x['OS-EXT-IPS:type'] == 'floating' }['addr']
         end
 
+        def username
+          'ubuntu'
+        end
+
         def state
           @server.state
         end

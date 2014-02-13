@@ -21,6 +21,9 @@ module Travis
           @server.ips.first['address']
         end
 
+        def username
+          'travis'
+        end
         def state
           @server.state
         end
