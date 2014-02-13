@@ -61,13 +61,16 @@ module Travis
       end
 
       def create_server(opts = {})
+        user_data  = "#! /bin/bash\nsudo useradd travis -m -s /bin/bash || true\n"
+        user_data += "echo travis:#{opts[:password]} | sudo chpasswd\n" if opts[:password]
+
         server = connection.servers.create(
           name: opts[:hostname],
           flavor_ref: config.flavor_id,
           image_ref: opts[:image_id] || config.image_id,
           key_name: config.key_name,
           nics: [{ net_id: config.internal_network_id }],
-          user_data: "#! /bin/bash\nsudo useradd travis -m -s /bin/bash || true\n" #sudo cp -R /home/ubuntu/.ssh /home/travis/.ssh\nsudo chown -R travis:travis /home/travis/.ssh"
+          user_data: user_data #sudo cp -R /home/ubuntu/.ssh /home/travis/.ssh\nsudo chown -R travis:travis /home/travis/.ssh"
         )
         
         server.wait_for { ready? }
