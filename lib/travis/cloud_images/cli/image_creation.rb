@@ -17,11 +17,14 @@ module Travis
       class ImageCreation < Thor
         namespace "travis:images"
 
+        DUP_MATCH_REGEX = /testing-worker-(\w+-\d+-\d+-\d+-\w+-\d+)-(\d+)/
+
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
+        method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
         def create(image_type = "standard")
           puts "\nAbout to create and provision #{image_type} template\n\n"
 
@@ -29,8 +32,8 @@ module Travis
 
           opts = { :hostname => "provisioning.#{image_type}" }
 
-          unless standard_image?(image_type)
-            opts[:image_id] = provider.latest_template('standard')['id']
+          if custom_base_image?(image_type, options[:base])
+            opts[:image_id] = base_image(options[:base])
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
@@ -48,7 +51,7 @@ module Travis
           provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-          result = provisioner.full_run(!standard_image?(image_type))
+          result = provisioner.full_run(skip_setup?(image_type, options[:base]))
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
@@ -139,8 +142,42 @@ module Travis
 
           servers.each do |server|
             name = server.hostname.gsub(/\.\w+\.blueboxgrid\.com/, '')
-            #puts server.inspect
             printf("%-30s %s\n", name, server.state)
+          end
+        end
+
+        desc 'duplicates', "Lists all possible duplicate VMs"
+        method_option :destroy, :aliases => '-d', :desc => 'destroy duplicates'
+        def duplicates
+          servers = provider.servers
+
+          grouped = servers.group_by do |s|
+            match = DUP_MATCH_REGEX.match(s.hostname)
+            match ? match[1] : nil
+          end
+
+          grouped.delete(nil)
+          grouped.delete_if { |k,v| v.size < 2 }
+
+          grouped.each do |k,v|
+            v.sort! do |a,b|
+              match1 = DUP_MATCH_REGEX.match(a.hostname)
+              match2 = DUP_MATCH_REGEX.match(b.hostname)
+              match1[2] <=> match2[2]
+            end
+            unless options[:destroy]
+              printf("%-30s %s\n", "Hostname", "State")
+              print("----------------------------------------\n")
+            end
+            v[0...-1].each do |server|
+              if options[:destroy]
+                server.destroy
+                puts "VM '#{server.hostname}' destroyed"
+              else
+                name = server.hostname.gsub(/\.\w+\.blueboxgrid\.com/, '')
+                printf("%-40s %s\n", name, server.state)
+              end
+            end
           end
         end
 
@@ -160,6 +197,32 @@ module Travis
 
         def standard_image?(image_type)
           image_type == 'standard'
+        end
+
+        def custom_base_image?(image_type, custom_base_name)
+          if custom_base_name
+            true
+          elsif custom_base_name == false
+            false
+          else
+            image_type != 'standard'
+          end
+        end
+
+        def base_image(custom_base_name)
+          if custom_base_name
+            provider.latest_template_id(custom_base_name)
+          else
+            provider.latest_template_id('standard')
+          end
+        end
+
+        def skip_setup?(image_type, custom_base_name)
+          if custom_base_name == false
+            false
+          else
+            !standard_image?(image_type)
+          end
         end
 
         def servers_with_name(name)
