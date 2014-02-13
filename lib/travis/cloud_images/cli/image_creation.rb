@@ -43,9 +43,9 @@ module Travis
           puts "  #{server.inspect}\n\n"
 
           puts "About to provision the VM using the credential:"
-          puts "  #{server.username}@#{server.ip_address} #{password}\n\n"
+          puts "  travis@#{server.ip_address} #{password}\n\n"
 
-          provisioner = VmProvisoner.new(server.ip_address, server.username, password, image_type)
+          provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
           result = provisioner.full_run(!standard_image?(image_type))
