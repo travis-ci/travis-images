@@ -1,5 +1,6 @@
 require 'travis/cloud_images/config'
 require 'travis/cloud_images/blue_box'
+require 'travis/cloud_images/open_stack'
 require 'travis/cloud_images/sauce_labs'
 require 'travis/cloud_images/vm_provisioner'
 require 'thor'
@@ -150,7 +151,7 @@ module Travis
         end
 
         def provider_class
-          { 'blue_box' => BlueBox, 'sauce_labs' => SauceLabs }[options["provider"]]
+          { 'blue_box' => BlueBox, 'sauce_labs' => SauceLabs, 'open_stack' => OpenStack }[options["provider"]]
         end
 
         def generate_password
