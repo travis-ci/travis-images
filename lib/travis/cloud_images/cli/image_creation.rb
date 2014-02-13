@@ -76,7 +76,7 @@ module Travis
 
           opts = {
             :hostname => hostname,
-            :image_id => provider.latest_template(image_type)['id']
+            :image_id => provider.latest_template_id(image_type)
           }
 
           opts[:ipv6_only] = true if options["ipv6"]
