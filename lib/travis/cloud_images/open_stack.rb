@@ -1,4 +1,4 @@
-equire 'fog'
+require 'fog'
 require 'shellwords'
 
 module Travis
