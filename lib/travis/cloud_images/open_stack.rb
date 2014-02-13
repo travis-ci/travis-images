@@ -73,14 +73,22 @@ module Travis
           nics: [{ net_id: config.internal_network_id }],
           user_data: user_data #sudo cp -R /home/ubuntu/.ssh /home/travis/.ssh\nsudo chown -R travis:travis /home/travis/.ssh"
         )
-        
+
         server.wait_for { ready? }
 
         ip = connection.allocate_address(config.external_network_id)
 
         connection.associate_address(server.id, ip.body["floating_ip"]["ip"])
-        
-        VirtualMachine.new(server.reload)
+
+        vm = VirtualMachine.new(server.reload)
+
+        # VMs are marked as ACTIVE when turned on
+        # but they make take awhile to become available via SSH
+        retryable(tries: 15, sleep: 6) do
+          ::Net::SSH.start(vm.ip_address, 'ubuntu',{ :keys => config.key_file_name, :paranoid => false }).shell
+        end
+
+        vm
       end
 
       def save_template(server, desc)
@@ -121,6 +129,21 @@ module Travis
       def config
         @config ||= Config.new.open_stack[account.to_s]
       end
+
+      def retryable(opts=nil)
+        opts = { :tries => 1, :on => Exception }.merge(opts || {})
+
+        begin
+          return yield
+        rescue *opts[:on]
+          if (opts[:tries] -= 1) > 0
+            sleep opts[:sleep].to_f if opts[:sleep]
+            retry
+          end
+          raise
+        end
+      end
+
     end
   end
 end
