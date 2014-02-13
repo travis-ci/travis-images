@@ -63,6 +63,7 @@ module Travis
       def create_server(opts = {})
         user_data  = "#! /bin/bash\nsudo useradd travis -m -s /bin/bash || true\n"
         user_data += "echo travis:#{opts[:password]} | sudo chpasswd\n" if opts[:password]
+        user_data += 'echo "travis ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
 
         server = connection.servers.create(
           name: opts[:hostname],
