@@ -19,7 +19,7 @@ module Travis
         end
       end
 
-      define  :blue_box => {}, :sauce_labs => {}
+      define  :blue_box => {}, :sauce_labs => {}, :open_stack => {}
 
       default :_access => [:key]
 
