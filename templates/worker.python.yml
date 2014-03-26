@@ -1,4 +1,5 @@
 recipes:
-  - python::multi
+  - python::pyenv
+  - python::system
   - python::devshm
   - sweeper
