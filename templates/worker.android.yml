@@ -1,0 +1,12 @@
+json:
+  java:
+    alternate_versions:
+      - openjdk7
+      - oraclejdk8
+recipes:
+  - java
+  - ant
+  - maven
+  - gradle::tarball
+  - android-sdk
+  - sweeper
