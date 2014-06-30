@@ -79,6 +79,10 @@ module Travis
         travis_templates.select { |t| t['description'] =~ /#{type}/ }.sort { |a, b| b['created'] <=> a['created'] }.first
       end
 
+      def latest_template_id(type)
+        latest_template(type)['id']
+      end
+
       def templates
         connection.get_templates.body
       end
