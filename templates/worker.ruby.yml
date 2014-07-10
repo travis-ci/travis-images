@@ -3,29 +3,29 @@ json:
     latest_minor: true
     default: 1.9.3
     rubies:
-      - name: 1.9.3-p327
+      - name: 1.9.3-p547
       - name: 1.8.7
-      - name: jruby-1.7.11-d18
+      - name: jruby-1.7.13-d18
         arguments: --18
         check_for: jruby-d18
-      - name: jruby-1.7.11-d19
+      - name: jruby-1.7.13-d19
         arguments: --19
         check_for: jruby-d19
       - name: ree
       - name: 1.9.2
       - name: 2.0.0
-      - name: 2.1.1
+      - name: 2.1.2
     gems:
       - bundler
       - rake
     aliases:
-      jruby-d18: jruby-1.7.11-d18
-      jruby-d19: jruby-1.7.11-d19
+      jruby-d18: jruby-1.7.13-d18
+      jruby-d19: jruby-1.7.13-d19
       jruby-18mode: jruby-d18
       jruby-19mode: jruby-d19
       jruby: jruby-19mode
       "2.0": "ruby-2.0.0"
-      "2.1": "ruby-2.1.1"
+      "2.1": "ruby-2.1.2"
   java:
     alternate_versions:
       - openjdk6
