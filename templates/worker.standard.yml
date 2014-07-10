@@ -9,9 +9,9 @@ json:
   golang:
     multi:
       versions:
-        - go1.2
-      aliases: [] 
-      default_version: go1.2
+        - go1.3
+      aliases: []
+      default_version: go1.3
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
