@@ -8,6 +8,8 @@ require 'digest'
 require 'digest/sha1'
 require 'openssl'
 require 'securerandom'
+require 'faraday'
+require 'json'
 
 $stdout.sync = true
 
@@ -55,7 +57,7 @@ module Travis
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
-            desc = [options["name"], image_type].compact.join('-')
+            desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks')].compact.join('-')
             provider.save_template(server, desc)
             server.destroy
             puts "#{image_type} template created!\n\n"
@@ -227,6 +229,19 @@ module Travis
 
         def servers_with_name(name)
           provider.servers.find_all { |s| s.hostname =~ /^#{name}/ }
+        end
+
+        def sha_for_repo(slug, branch = 'master', length = 7)
+          conn = Faraday.new(:url => "https://api.github.com") do |faraday|
+            faraday.adapter Faraday.default_adapter
+          end
+
+          response = conn.get "/repos/#{slug}/git/refs/heads/#{branch}"
+          data = JSON.parse(response.body)
+
+          data["object"]["sha"][0,length]
+        rescue
+          'f' * length
         end
       end
     end
