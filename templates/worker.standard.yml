@@ -33,6 +33,7 @@ recipes:
   - scons
   - unarchivers
   - md5deep
+  - dictionaries
   #
   # additional libraries needed to run headless WebKit,
   # build parsers, for ossp-uuid to work and so on
