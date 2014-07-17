@@ -27,6 +27,7 @@ module Travis
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
+        method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
         def create(image_type = "standard")
           puts "\nAbout to create and provision #{image_type} template\n\n"
 
@@ -53,7 +54,8 @@ module Travis
           provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-          result = provisioner.full_run(skip_setup?(image_type, options[:base]))
+          result = provisioner.full_run(options)
+          # result = provisioner.full_run(skip_setup?(image_type, options[:base]))
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
@@ -216,14 +218,6 @@ module Travis
             provider.latest_template_id(custom_base_name)
           else
             provider.latest_template_id('standard')
-          end
-        end
-
-        def skip_setup?(image_type, custom_base_name)
-          if custom_base_name == false
-            false
-          else
-            !standard_image?(image_type)
           end
         end
 

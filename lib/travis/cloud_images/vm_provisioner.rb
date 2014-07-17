@@ -35,12 +35,13 @@ RUBY
           'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 11.8.2-1'
         ]
 
+        # It is important that there is exactly one
         PREP_CHEF = [
           'mkdir -p /tmp/vm-provisioning/assets/cache',
           "echo #{Shellwords.escape(Assets::SOLO_RB)} > /tmp/vm-provisioning/assets/solo.rb",
           'cd /tmp/vm-provisioning',
           'rm -rf travis-cookbooks',
-          'curl -L https://api.github.com/repos/travis-ci/travis-cookbooks/tarball > travis-cookbooks.tar.gz',
+          'curl -L https://api.github.com/repos/travis-ci/travis-cookbooks/tarball/%{branch} > travis-cookbooks.tar.gz',
           'tar xvf travis-cookbooks.tar.gz',
           'mv travis-ci-travis-cookbooks-* travis-cookbooks',
           'rm travis-cookbooks.tar.gz'
@@ -109,8 +110,9 @@ RUBY
         run_commands(Commands::INSTALL_CHEF)
       end
 
-      def prep_chef
-        run_commands(Commands::PREP_CHEF)
+      def prep_chef(cookbooks_branch = 'master')
+        puts "Preparing Chef with branch: #{cookbooks_branch}"
+        run_commands(Commands::PREP_CHEF.map{ |x| x % { branch: cookbooks_branch } })
       end
 
       def updated_run_list
@@ -132,10 +134,11 @@ RUBY
         run_commands(Commands::CLEAN_UP)
       end
 
-      def full_run(skip_setup = false)
-        (skip_setup || setup_env) &&
+      def full_run(opts)
+        puts "Running #{__method__} with opts: #{opts}"
+        (skip_setup?(opts) || setup_env) &&
         install_chef &&
-        prep_chef &&
+        prep_chef(opts[:cookbooks_branch]) &&
         run_chef &&
         clean_up
       end
@@ -148,6 +151,14 @@ RUBY
 
       def create_run_list(box_config)
         box_config['recipes'].map { |r| "recipe[#{r}]" }
+      end
+
+      def skip_setup?(opts)
+        if opts[:custom_base_name] == false
+          false
+        else
+          opts[:image_type] != 'standard'
+        end
       end
     end
   end
