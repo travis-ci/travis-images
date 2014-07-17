@@ -29,7 +29,7 @@ module Travis
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
         method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
         def create(image_type = "standard")
-          puts "\nAbout to create and provision #{image_type} template\n\n"
+          puts "#{DateTime.now}\nAbout to create and provision #{image_type} template\n\n"
 
           password = generate_password
 
@@ -55,11 +55,10 @@ module Travis
 
           puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
           result = provisioner.full_run(options)
-          # result = provisioner.full_run(skip_setup?(image_type, options[:base]))
           puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
 
           if result
-            desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks')].compact.join('-')
+            desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
             provider.save_template(server, desc)
             server.destroy
             puts "#{image_type} template created!\n\n"
@@ -67,7 +66,7 @@ module Travis
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
           end
 
-          puts "#{server.hostname} VM destroyed"
+          clean_up(server)
         end
 
 
@@ -122,10 +121,10 @@ module Travis
 
 
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
-        def clean_up
-          servers = servers_with_name("provisioning.")
+        def clean_up(servers = nil)
+          servers ||= servers_with_name("provisioning.")
 
-          destroyed = servers.map do |s|
+          destroyed = Array(servers).map do |s|
             s.destroy
             puts "VM '#{s.hostname}' destroyed"
             s
