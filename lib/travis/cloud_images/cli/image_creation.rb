@@ -67,7 +67,11 @@ module Travis
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
           end
 
-          clean_up(server) unless options[:keep]
+          if options[:keep]
+            puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
+          else
+            clean_up(server)
+          end
         end
 
 
