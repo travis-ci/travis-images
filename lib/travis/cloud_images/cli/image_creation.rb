@@ -28,6 +28,7 @@ module Travis
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
         method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
+        method_option :keep, :aliases => '-k', :desc => 'In case of build failures, do keep provisioning VM for further inspection'
         def create(image_type = "standard")
           puts "#{DateTime.now}\nAbout to create and provision #{image_type} template\n\n"
 
@@ -66,7 +67,7 @@ module Travis
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
           end
 
-          clean_up(server)
+          clean_up(server) unless options[:keep]
         end
 
 
