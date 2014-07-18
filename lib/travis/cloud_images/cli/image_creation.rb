@@ -70,7 +70,7 @@ module Travis
           if options[:keep]
             puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
           else
-            clean_up(server)
+            clean_up
           end
         end
 
@@ -126,8 +126,8 @@ module Travis
 
 
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
-        def clean_up(servers = nil)
-          servers ||= servers_with_name("provisioning.")
+        def clean_up
+          servers = servers_with_name("provisioning.")
 
           destroyed = Array(servers).map do |s|
             s.destroy
