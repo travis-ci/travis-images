@@ -61,17 +61,17 @@ module Travis
           if result
             desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
             provider.save_template(server, desc)
-            server.destroy
+            clean_up(server)
             puts "#{image_type} template created!\n\n"
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
+            if options[:keep]
+              puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
+            else
+              clean_up(server)
+            end
           end
 
-          if options[:keep]
-            puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
-          else
-            clean_up
-          end
         end
 
 
@@ -126,8 +126,8 @@ module Travis
 
 
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
-        def clean_up
-          servers = servers_with_name("provisioning.")
+        def clean_up(servers = nil)
+          servers ||= servers_with_name("provisioning.")
 
           destroyed = Array(servers).map do |s|
             s.destroy
