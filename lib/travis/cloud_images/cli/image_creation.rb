@@ -44,19 +44,27 @@ module Travis
 
           opts[:password] = password
 
-          server = provider.create_server(opts)
+          begin
+            server = provider.create_server(opts)
 
-          puts "VM created : "
-          puts "  #{server.inspect}\n\n"
+            puts "VM created : "
+            puts "  #{server.inspect}\n\n"
 
-          puts "About to provision the VM using the credential:"
-          puts "  travis@#{server.ip_address} #{password}\n\n"
+            puts "About to provision the VM using the credential:"
+            puts "  travis@#{server.ip_address} #{password}\n\n"
 
-          provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
+            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
-          puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-          result = provisioner.full_run(options)
-          puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
+            puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
+            result = provisioner.full_run(options)
+            puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
+          rescue Exception => e
+            puts "Error while creating image"
+            puts e.message
+
+            clean_up(server)
+            return
+          end
 
           if result
             desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
