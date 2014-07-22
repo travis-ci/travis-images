@@ -225,12 +225,8 @@ module Travis
           end
         end
 
-        def base_image(custom_base_name)
-          if custom_base_name
-            provider.latest_template_id(custom_base_name)
-          else
-            provider.latest_template_id('standard')
-          end
+        def base_image(custom_base_name = 'standard')
+          provider.latest_template_id(custom_base_name)
         end
 
         def servers_with_name(name)
