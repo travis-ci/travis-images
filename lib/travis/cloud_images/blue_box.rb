@@ -76,7 +76,9 @@ module Travis
       end
 
       def latest_template_matching(regexp)
-        travis_templates.select { |t| t['description'] =~ Regexp.new(regexp) }.sort { |a, b| b['created'] <=> a['created'] }.first
+        travis_templates.
+          sort_by { |t| t['created'] }.reverse.
+          find { |t| t['description'] =~ Regexp.new(regexp) }
       end
 
       def latest_template(type)
