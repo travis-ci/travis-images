@@ -89,13 +89,13 @@ module Travis
         def boot(image_type = 'ruby')
           password = generate_password
 
-          name_addition = [options[:name], image_type].join('-')
+          name_addition = [options[:name], image_type].compact.join('-')
 
           hostname = "debug-#{name_addition}-#{Time.now.to_i}"
 
           opts = {
             :hostname => hostname,
-            :image_id => provider.latest_template_id(image_type)
+            :image_id => provider.latest_template_matching(/^travis-#{name_addition}/)['id']
           }
 
           opts[:ipv6_only] = true if options["ipv6"]
