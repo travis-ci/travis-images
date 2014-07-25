@@ -86,7 +86,7 @@ module Travis
       end
 
       def latest_released_template(type)
-        latest_template_matching(/^travis-#{Regexp.quote(type)}/)
+        latest_template_matching("^travis-#{Regexp.quote(type)}")
       end
 
       def templates
