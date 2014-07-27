@@ -91,9 +91,9 @@ module Travis
         def boot(image_type = 'ruby')
           password = generate_password
 
-          name_components = ['debug', options[:name], image_type, Time.now.to_i]
+          name_addition = [options[:name], image_type].compact.join('-')
 
-          hostname = name_components.select { |e| e.to_s.size > 0 }.join('-')
+          hostname = "debug-#{name_addition}-#{Time.now.to_i}"
 
           opts = {
             :hostname => hostname,
