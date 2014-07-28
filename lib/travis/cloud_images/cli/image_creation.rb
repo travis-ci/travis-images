@@ -226,7 +226,8 @@ module Travis
         end
 
         def base_image(custom_base_name = 'standard')
-          provider.latest_template_id(custom_base_name)
+          custom_base_name ||= 'standard'
+          provider.latest_template(custom_base_name)['id']
         end
 
         def servers_with_name(name)
