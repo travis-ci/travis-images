@@ -34,10 +34,12 @@ module Travis
 
           password = generate_password
 
-          opts = { :hostname => "provisioning.#{image_type}" }
+          hostname = "provisioning.#{image_type}"
+
+          opts = { :hostname => hostname }
 
           if custom_base_image?(image_type, options[:base])
-            opts[:image_id] = base_image(options[:base])
+            opts[:image_id] = base_image(options[:base], options[:name])
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
@@ -62,21 +64,21 @@ module Travis
             puts "Error while creating image"
             puts e.message
 
-            clean_up(server)
+            destroy(hostname)
             return
           end
 
           if result
             desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
             provider.save_template(server, desc)
-            clean_up(server)
+            destroy(hostname)
             puts "#{image_type} template created!\n\n"
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
             if options[:keep]
               puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
             else
-              clean_up(server)
+              destroy(hostname)
             end
           end
 
@@ -113,6 +115,10 @@ module Travis
           puts "Connection details are:"
           puts "  ssh travis@#{server.ip_address}"
           puts "  password: #{password}"
+
+        rescue Exception => e
+          puts "Error while booting image: #{e.message}"
+          destroy(hostname)
         end
 
 
@@ -225,9 +231,10 @@ module Travis
           end
         end
 
-        def base_image(custom_base_name = 'standard')
+        def base_image(custom_base_name = 'standard', name = nil)
           custom_base_name ||= 'standard'
-          provider.latest_template(custom_base_name)['id']
+          name_pattern = [name, custom_base_name].compact.join('-')
+          provider.latest_template(name_pattern)['id']
         end
 
         def servers_with_name(name)
