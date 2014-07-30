@@ -39,7 +39,13 @@ module Travis
           opts = { :hostname => hostname }
 
           if custom_base_image?(image_type, options[:base])
-            opts[:image_id] = base_image(options[:base], options[:name])
+            image = base_image(options[:base], options[:name])
+            unless image
+              puts "Appropriate image with name '#{options[:name]}'' was not found."
+              image = base_image(options[:base])
+            end
+            puts "Base image:\n\tdescription: %s\n\tid: %s" % [ image['description'], image['id'] ]
+            opts[:image_id] = image['id']
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
@@ -234,7 +240,7 @@ module Travis
         def base_image(custom_base_name = 'standard', name = nil)
           custom_base_name ||= 'standard'
           name_pattern = [name, custom_base_name].compact.join('-')
-          provider.latest_template(name_pattern)['id']
+          provider.latest_template(name_pattern)
         end
 
         def servers_with_name(name)
