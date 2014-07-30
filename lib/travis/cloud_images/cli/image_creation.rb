@@ -75,7 +75,7 @@ module Travis
           end
 
           if result
-            desc = [options["name"], image_type, sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
+            desc = [options["name"], image_type, Time.now.utc.strftime('%Y-%m-%d-%H-%M'), sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])].compact.join('-')
             provider.save_template(server, desc)
             destroy(hostname)
             puts "#{image_type} template created!\n\n"

@@ -65,8 +65,7 @@ module Travis
       end
 
       def save_template(server, desc)
-        timestamp = Time.now.utc.strftime('%Y-%m-%d-%H-%M')
-        full_desc = "travis-#{desc}-#{timestamp}"
+        full_desc = "travis-#{desc}"
 
         connection.create_template(server.vm_id, :description => full_desc)
 
