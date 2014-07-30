@@ -83,7 +83,7 @@ module Travis
             ].compact.join('-')
             provider.save_template(server, desc)
             destroy(hostname)
-            puts "#{image_type} template created!\n\n"
+            puts "#{image_type} template created with descritpion: #{desc}\n\n"
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
             if options[:keep]
