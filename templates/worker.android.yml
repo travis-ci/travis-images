@@ -10,6 +10,7 @@ recipes:
   - maven
   - gradle::tarball
   - android-sdk
+  - android-ndk
   - sweeper
 list_versions_by:
   - sudo -i -u travis android list sdk --no-ui --all --extended | awk -F\" '/^id/ {print $2}' | sort
