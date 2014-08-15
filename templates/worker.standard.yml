@@ -109,3 +109,22 @@ recipes:
   - emacs::nox
   - vim
   - sweeper
+
+list_versions_by:
+  - dpkg --list
+  - sudo -i -u travis rvm list
+  - sudo -i -u travis gem list
+  - sudo -i -u travis nvm list
+  - sudo -i -u travis gvm list
+  - sudo -i -u travis pip --version
+  - redis-server --version
+  - riak version
+  - couchdb -V | grep couchdb
+  - service neo4j restart >/dev/null                    && sleep 15 && wget -O- http://localhost:7474/db/data 2>/dev/null | awk -F\" '/neo4j_version/ {print "neo4j", $4}' && service neo4j stop >/dev/null
+  - "sudo service cassandra restart >/dev/null          && sleep 15 && /usr/local/cassandra/bin/nodetool version | awk -F: '/ReleaseVersion/ {print $1, $2}'               && service cassandra stop >/dev/null"
+  - "sudo service rabbitmq-server restart >/dev/null    && sleep 15 && sudo rabbitmqctl status | awk -F \\\" '/\\\"RabbitMQ\\\"/ {print $2, $4}'                           && sudo service rabbitmq-server stop >/dev/null"
+  - "sudo service elasticsearch restart >/dev/null 2>&1 && sleep 15 && curl -XGET localhost:9200 2>/dev/null| grep number                                                  && sudo service elasticsearch stop >/dev/null"
+  - echo "sphinx"; ls -lad /usr/local/sphinx-*
+  - echo "sphinx default"; ls -l /usr/local/bin/searchd
+  - ls -d /usr/local/firefox-*  | awk -F- '{print "firefox", $2}'
+  - echo -n "phantomjs "; phantomjs --version
