@@ -37,3 +37,6 @@ recipes:
   - rvm::multi
   - java
   - sweeper
+
+list_versions_by:
+  - sudo -i -u travis rvm list
