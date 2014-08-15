@@ -112,6 +112,7 @@ recipes:
 
 list_versions_by:
   - dpkg --list
+  - sudo -i -u travis rvm --version
   - sudo -i -u travis rvm list
   - sudo -i -u travis gem list
   - sudo -i -u travis nvm list
