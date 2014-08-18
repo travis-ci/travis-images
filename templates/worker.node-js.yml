@@ -17,4 +17,4 @@ recipes:
   - nodejs::multi
   - sweeper
 list_versions_by:
-  - nvm list
+  - sudo -i -u travis nvm list

@@ -15,6 +15,6 @@ recipes:
 list_versions_by:
   - ant -version
   - mvn -version
-  - lein version
-  - lein2 version
-  - gradle -version
+  - sudo -i -u travis lein version
+  - sudo -i -u travis lein2 version
+  - sudo -i -u travis gradle -version

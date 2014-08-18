@@ -3,5 +3,5 @@ recipes:
   - rebar
   - sweeper
 list_versions_by:
-  - kerl list installations
-  - rebar --version
+  - sudo -i -u travis kerl list installations
+  - sudo -i -u travis rebar --version
