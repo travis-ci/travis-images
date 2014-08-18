@@ -16,3 +16,5 @@ json:
 recipes:
   - nodejs::multi
   - sweeper
+list_versions_by:
+  - nvm list
