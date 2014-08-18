@@ -12,3 +12,9 @@ recipes:
   - sbt
   - gradle::tarball
   - sweeper
+list_versions_by:
+  - ant -version
+  - mvn -version
+  - lein version
+  - lein2 version
+  - gradle -version
