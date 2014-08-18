@@ -3,4 +3,4 @@ recipes:
   - sweeper
 
 list_versions_by:
-  - perlbrew list
+  - sudo -i -u travis perlbrew list

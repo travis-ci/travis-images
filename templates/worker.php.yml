@@ -6,5 +6,5 @@ recipes:
   - composer
   - sweeper
 list_versions_by:
-  - phpenv versions
-  - composer --version
+  - sudo -i -u travis phpenv versions
+  - sudo -i -u travis composer --version
