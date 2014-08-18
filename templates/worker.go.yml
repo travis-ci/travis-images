@@ -15,3 +15,5 @@ json:
 recipes:
   - golang::multi
   - sweeper
+list_versions_by:
+  - gvm list
