@@ -11,3 +11,8 @@ recipes:
   - gradle::tarball
   - android-sdk
   - sweeper
+list_versions_by:
+  - sudo -i -u travis android list sdk --no-ui --all --extended | awk -F\" '/^id/ {print $2}'
+  - ant -version
+  - mvn -version
+  - sudo -i -u travis gradle -version
