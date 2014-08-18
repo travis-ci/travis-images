@@ -1,6 +1,7 @@
 json:
   java:
     alternate_versions:
+      - openjdk6
       - openjdk7
       - oraclejdk8
 recipes:
