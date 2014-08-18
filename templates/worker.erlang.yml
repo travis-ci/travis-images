@@ -2,3 +2,6 @@ recipes:
   - kerl
   - rebar
   - sweeper
+list_versions_by:
+  - kerl list installations
+  - rebar --version
