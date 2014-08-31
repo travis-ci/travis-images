@@ -15,6 +15,9 @@ recipes:
 list_versions_by:
   - ant -version
   - mvn -version
+  - sudo -i -u travis bash -c "jdk_switcher use openjdk6; java -version"
+  - sudo -i -u travis bash -c "jdk_switcher use openjdk7; java -version"
+  - sudo -i -u travis bash -c "jdk_switcher use oraclejdk8; java -version"
   - sudo -i -u travis lein1 version
   - sudo -i -u travis lein2 version
   - sudo -i -u travis lein version
