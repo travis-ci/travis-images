@@ -41,7 +41,7 @@ module Travis
           if custom_base_image?(image_type, options[:base])
             image = base_image(options[:base], options[:name])
             unless image
-              puts "Appropriate image with name '#{options[:name]}'' was not found."
+              puts "Appropriate image with name '#{options[:name]}' was not found."
               image = base_image(options[:base])
             end
             puts "Base image:\n\tdescription: %s\n\tid: %s" % [ image['description'], image['id'] ]
