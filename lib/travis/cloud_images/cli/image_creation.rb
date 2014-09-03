@@ -19,6 +19,7 @@ module Travis
       class ImageCreation < Thor
         namespace "travis:images"
 
+        DEFAULT_DIST = 'precise'
         DUP_MATCH_REGEX = /testing-worker-(\w+-\d+-\d+-\d+-\w+-\d+)-(\d+)/
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
@@ -26,23 +27,27 @@ module Travis
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
         method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
         method_option :keep, :aliases => '-k', :desc => 'In case of build failures, do keep provisioning VM for further inspection'
         def create(image_type = "standard")
+
           puts "#{DateTime.now}\nAbout to create and provision #{image_type} template\n\n"
 
           password = generate_password
 
-          hostname = "provisioning.#{image_type}"
+          hostname = "provisioning.#{options[:dist]}.#{options[:name]}.#{image_type}"
 
           opts = { :hostname => hostname }
 
+          opts[:dist] = options[:dist] || DEFAULT_DIST
+
           if custom_base_image?(image_type, options[:base])
-            image = base_image(options[:base], options[:name])
+            image = base_image(options[:base], options[:name], opts[:dist])
             unless image
-              puts "Appropriate image with name '#{options[:name]}'' was not found."
-              image = base_image(options[:base])
+              puts "Appropriate image with name '#{options[:name]}' was not found."
+              image = base_image(options[:base], nil, DEFAULT_DIST)
             end
             puts "Base image:\n\tdescription: %s\n\tid: %s" % [ image['description'], image['id'] ]
             opts[:image_id] = image['id']
@@ -64,7 +69,7 @@ module Travis
             provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
 
             puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-            result = provisioner.full_run(options.dup.merge(image_type: image_type))
+            result = provisioner.full_run(options.dup.merge(image_type: image_type)) && provisioner.list_versions
             puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
           rescue Exception => e
             puts "Error while creating image"
@@ -76,6 +81,7 @@ module Travis
 
           if result
             desc = [
+              options[:dist],
               options["name"],
               image_type,
               Time.now.utc.strftime('%Y-%m-%d-%H-%M'),
@@ -98,11 +104,12 @@ module Travis
 
         desc 'boot [IMAGE_TYPE]', 'Boot a VM for testing, defaults to "ruby"'
         method_option :name, :aliases => '-n', :desc => 'additional naming option as to help idenify booted instances'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
         method_option :ipv6, :default => false, :type => :boolean, :desc => 'boot an ipv6 only vm, only supported by bluebox right now'
         def boot(image_type = 'ruby')
           password = generate_password
 
-          name_addition = [options[:name], image_type].compact.join('-')
+          name_addition = [options[:dist], options[:name], image_type].compact.join('-')
 
           hostname = "debug-#{name_addition}-#{Time.now.to_i}"
 
@@ -242,9 +249,9 @@ module Travis
           end
         end
 
-        def base_image(custom_base_name = 'standard', name = nil)
+        def base_image(custom_base_name = 'standard', name = nil, dist = nil)
           custom_base_name ||= 'standard'
-          name_pattern = [name, custom_base_name].compact.join('-')
+          name_pattern = [dist, name, custom_base_name].compact.join('-')
           provider.latest_template(name_pattern)
         end
 

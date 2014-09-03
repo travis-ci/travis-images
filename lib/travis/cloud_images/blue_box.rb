@@ -55,11 +55,13 @@ module Travis
       def create_server(opts = {})
         defaults = {
           :username    => 'travis',
-          :image_id    => config.image_id,
+          :image_id    => config.image_id[opts[:dist].to_sym],
           :flavor_id   => config.flavor_id,
           :location_id => config.location_id
         }
-        server = connection.servers.create(defaults.merge(opts))
+        options = defaults.merge(opts)
+        puts "options: #{options}"
+        server = connection.servers.create(options)
         server.wait_for { ready? }
         VirtualMachine.new(server)
       end

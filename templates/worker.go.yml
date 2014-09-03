@@ -4,8 +4,8 @@ json:
       versions:
         - go1.1.2
         - go1.2.2
-        - go1.3
-      default_version: go1.3
+        - go1.3.1
+      default_version: go1.3.1
       aliases:
         "go1.1": "go1.1.2"
         "go1.2": "go1.2.2"
