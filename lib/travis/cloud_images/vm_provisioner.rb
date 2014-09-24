@@ -124,7 +124,7 @@ RUBY
       def run_chef(opts = nil)
         solo_json = '/tmp/vm-provisioning/assets/solo.json'
         if opts[:cookbooks_node]
-          run_commands( "touch #{solo_json}")
+          run_commands( "echo '{}' > #{solo_json}")
           node_opts = "-N #{opts[:cookbooks_node]}"
         else
           run_commands( "echo #{Shellwords.escape(MultiJson.encode(updated_run_list))} > #{solo_json}" )
