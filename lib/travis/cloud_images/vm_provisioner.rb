@@ -122,11 +122,13 @@ RUBY
       end
 
       def run_chef(opts = nil)
-        node_opts = "-N #{opts[:cookbooks_node]}" if opts[:cookbooks_node]
-        run_commands([
-          "echo #{Shellwords.escape(MultiJson.encode(updated_run_list))} > /tmp/vm-provisioning/assets/solo.json",
-          "sudo chef-solo #{node_opts} -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
-        ])
+        if opts[:cookbooks_node]
+          node_opts = "-N #{opts[:cookbooks_node]}"
+        else
+          run_commands( "echo #{Shellwords.escape(MultiJson.encode(updated_run_list))} > /tmp/vm-provisioning/assets/solo.json" )
+          node_opts = "-c /tmp/vm-provisioning/assets/solo.rb"
+        end
+        run_commands( "sudo chef-solo #{node_opts} -j /tmp/vm-provisioning/assets/solo.json" )
       end
 
       def clean_up
