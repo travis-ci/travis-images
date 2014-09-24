@@ -121,10 +121,11 @@ RUBY
         box_config['json'].merge('run_list' => create_run_list)
       end
 
-      def run_chef
+      def run_chef(opts = nil)
+        node_opts = "-N #{opts[:cookbooks_node]}" if opts[:cookbooks_node]
         run_commands([
           "echo #{Shellwords.escape(MultiJson.encode(updated_run_list))} > /tmp/vm-provisioning/assets/solo.json",
-          "sudo chef-solo -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
+          "sudo chef-solo #{node_opts} -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
         ])
       end
 
@@ -137,7 +138,7 @@ RUBY
         (skip_setup?(opts) || setup_env) &&
         install_chef &&
         prep_chef(opts[:cookbooks_branch]) &&
-        run_chef &&
+        run_chef(opts) &&
         clean_up
       end
 
