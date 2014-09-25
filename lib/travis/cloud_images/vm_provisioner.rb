@@ -22,7 +22,7 @@ RUBY
           'sudo usermod -s /bin/bash travis',
           'sudo apt-get -y update',
           'sudo apt-get -y -qq upgrade',
-          'sudo apt-get -y -qq install curl build-essential bison openssl vim wget',
+          'sudo apt-get -y -qq install bash curl build-essential bison openssl vim wget',
           'sudo rm /dev/null',
           'sudo mknod -m 0666 /dev/null c 1 3',
           'sudo apt-get -y install --reinstall language-pack-en',
