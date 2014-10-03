@@ -41,7 +41,7 @@ module Travis
 
           opts = { :hostname => hostname }
 
-          opts[:dist] = options[:dist] || DEFAULT_DIST
+          opts[:dist] = options[:dist]
 
           if custom_base_image?(image_type, options[:base])
             image = base_image(options[:base], options[:name], opts[:dist])
@@ -252,6 +252,7 @@ module Travis
         def base_image(custom_base_name = 'standard', name = nil, dist = nil)
           custom_base_name ||= 'standard'
           name_pattern = [dist, name, custom_base_name].compact.join('-')
+          puts "name_pattern: #{name_pattern}"
           provider.latest_template(name_pattern)
         end
 

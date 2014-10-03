@@ -55,7 +55,7 @@ module Travis
       def create_server(opts = {})
         defaults = {
           :username    => 'travis',
-          :image_id    => config.image_id[opts[:dist].to_sym],
+          :image_id    => config.image_id[(opts[:dist] || ::Travis::CloudImages::Cli::ImageCreation::DEFAULT_DIST).to_sym],
           :flavor_id   => config.flavor_id,
           :location_id => config.location_id
         }
