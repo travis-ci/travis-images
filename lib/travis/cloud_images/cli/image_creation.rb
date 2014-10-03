@@ -37,7 +37,7 @@ module Travis
 
           password = generate_password
 
-          hostname = "provisioning.#{options[:dist]}.#{options[:name]}.#{image_type}"
+          hostname = ["provisioning", options[:dist], options[:name], image_type].compact.join(".")
 
           opts = { :hostname => hostname }
 
