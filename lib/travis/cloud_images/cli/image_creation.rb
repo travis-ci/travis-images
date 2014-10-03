@@ -66,7 +66,7 @@ module Travis
             puts "About to provision the VM using the credential:"
             puts "  travis@#{server.ip_address} #{password}\n\n"
 
-            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
+            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist])
 
             puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
             result = provisioner.full_run(options.dup.merge(image_type: image_type)) && provisioner.list_versions

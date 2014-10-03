@@ -58,12 +58,14 @@ RUBY
       attr_reader :host
       attr_reader :log
       attr_reader :box_type
+      attr_reader :dist
 
-      def initialize(host, user, password, box_type = 'standard')
+      def initialize(host, user, password, box_type = 'standard', dist = nil)
         @host = host
         @user = user
         @password = password
         @box_type = box_type
+        @dist = dist
         @log  = ""
       end
 
@@ -142,7 +144,9 @@ RUBY
       end
 
       def parse_template_config
-        full_path = File.expand_path("templates/worker.#{box_type}.yml")
+        full_path = dist && File.exists?(File.expand_path("templates/worker.#{dist}.#{box_type}.yml")) ?
+          File.expand_path("templates/worker.#{dist}.#{box_type}.yml") :
+          File.expand_path("templates/worker.#{box_type}.yml")
         contents = File.read(full_path)
         YAML.load(contents)
       end
