@@ -4,11 +4,13 @@ json:
       versions:
         - go1.1.2
         - go1.2.2
-        - go1.3.1
-      default_version: go1.3.1
+        - go1.3.3
+      default_version: go1.3.3
       aliases:
         "go1.1": "go1.1.2"
         "go1.2": "go1.2.2"
 recipes:
   - golang::multi
   - sweeper
+list_versions_by:
+  - gvm list

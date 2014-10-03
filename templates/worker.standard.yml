@@ -9,9 +9,9 @@ json:
   golang:
     multi:
       versions:
-        - go1.3.1
+        - go1.3.3
       aliases: []
-      default_version: go1.3.1
+      default_version: go1.3.3
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
@@ -125,7 +125,7 @@ list_versions_by:
   - "sudo service cassandra restart >/dev/null          && sleep 15 && /usr/local/cassandra/bin/nodetool version | awk -F: '/ReleaseVersion/ {print $1, $2}'               && service cassandra stop >/dev/null; sudo rm -rf /var/lib/cassandra/*"
   - "sudo service rabbitmq-server restart >/dev/null    && sleep 15 && sudo rabbitmqctl status | awk -F \\\" '/\\\"RabbitMQ\\\"/ {print $2, $4}'                           && sudo service rabbitmq-server stop >/dev/null"
   - "sudo service elasticsearch restart >/dev/null 2>&1 && sleep 15 && curl -XGET localhost:9200 2>/dev/null| grep number                                                  && sudo service elasticsearch stop >/dev/null"
-  # - echo "sphinx"; ls -lad /usr/local/sphinx-*
-  # - echo "sphinx default"; ls -l /usr/local/bin/searchd
+  - echo "sphinx"; ls -lad /usr/local/sphinx-*
+  - echo "sphinx default"; ls -l /usr/local/bin/searchd
   - ls -d /usr/local/firefox-*  | awk -F- '{print "firefox", $2}'
   - echo -n "phantomjs "; phantomjs --version

@@ -1,3 +1,6 @@
 recipes:
   - perlbrew::multi
   - sweeper
+
+list_versions_by:
+  - sudo -i -u travis perlbrew list

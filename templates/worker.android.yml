@@ -1,6 +1,7 @@
 json:
   java:
     alternate_versions:
+      - openjdk6
       - openjdk7
       - oraclejdk8
 recipes:
@@ -10,3 +11,8 @@ recipes:
   - gradle::tarball
   - android-sdk
   - sweeper
+list_versions_by:
+  - sudo -i -u travis android list sdk --no-ui --all --extended | awk -F\" '/^id/ {print $2}' | sort
+  - ant -version
+  - mvn -version
+  - sudo -i -u travis gradle -version

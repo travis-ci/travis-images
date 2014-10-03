@@ -22,7 +22,7 @@ RUBY
           'sudo usermod -s /bin/bash travis',
           'sudo apt-get -y update',
           'sudo apt-get -y -qq upgrade',
-          'sudo apt-get -y -qq install curl build-essential bison openssl vim wget',
+          'sudo apt-get -y -qq install bash curl build-essential bison openssl vim wget',
           'sudo rm /dev/null',
           'sudo mknod -m 0666 /dev/null c 1 3',
           'sudo apt-get -y install --reinstall language-pack-en',
@@ -95,7 +95,7 @@ RUBY
       end
 
       def run_commands(commands)
-        commands.all? do |cmd|
+        Array(commands).all? do |cmd|
           status = exec(cmd)
           puts "'#{cmd}' failed :(" unless status == 0
           status == 0
@@ -116,11 +116,9 @@ RUBY
       end
 
       def updated_run_list
-        box_config = parse_template_config
-
         box_config['json'] ||= {}
 
-        box_config['json'].merge('run_list' => create_run_list(box_config))
+        box_config['json'].merge('run_list' => create_run_list)
       end
 
       def run_chef
@@ -149,7 +147,7 @@ RUBY
         YAML.load(contents)
       end
 
-      def create_run_list(box_config)
+      def create_run_list
         box_config['recipes'].map { |r| "recipe[#{r}]" }
       end
 
@@ -159,6 +157,14 @@ RUBY
         else
           opts[:image_type] != 'standard'
         end
+      end
+
+      def box_config
+        @box_config ||= parse_template_config
+      end
+
+      def list_versions
+        run_commands box_config['list_versions_by']
       end
     end
   end
