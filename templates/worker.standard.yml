@@ -12,6 +12,12 @@ json:
         - go1.3.3
       aliases: []
       default_version: go1.3.3
+  php:
+    multi:
+      versions:
+        - 5.5.17
+      aliases:
+        "5.5": "5.5.17"
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
@@ -64,6 +70,8 @@ recipes:
   #
   - rvm
   - rvm::multi
+  # PHP
+  - php::multi
   #
   # Python and pip
   #
