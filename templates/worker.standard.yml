@@ -18,6 +18,15 @@ json:
         - 5.5.17
       aliases:
         "5.5": "5.5.17"
+      extensions:
+        apc: {}
+        memcache: {}
+        memcache-beta: {}
+        memcached: {}
+        mongo: {}
+        amqp: {}
+        zmq-beta: {}
+        redis: {}
   travis_build_environment:
     use_tmpfs_for_builds: false
 recipes:
