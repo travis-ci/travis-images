@@ -7,11 +7,11 @@ json:
       - 0.8.27
       - 0.10.18
       - 0.10.32
-      - 0.11.13
+      - 0.11.14
     aliases:
       "0.10": '0.1'
-      0.11.13: node-head
-      0.11.13: node-unstable
+      0.11.14: node-head
+      0.11.14: node-unstable
     default: 0.10.32
 recipes:
   - nodejs::multi
