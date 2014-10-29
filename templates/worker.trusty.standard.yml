@@ -20,6 +20,7 @@ recipes:
   #
   - travis_build_environment
   - apt
+  - package-updates
   - build-essential
   - clang::tarball
   - golang::multi

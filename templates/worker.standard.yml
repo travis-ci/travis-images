@@ -1,8 +1,8 @@
 json:
   rvm:
-    default: 1.9.3-p547
+    default: 1.9.3-p550
     rubies:
-      - name: 1.9.3-p547
+      - name: 1.9.3-p550
     gems:
       - bundler
       - rake
@@ -20,6 +20,7 @@ recipes:
   #
   - travis_build_environment
   - apt
+  - package-updates
   - build-essential
   - clang::tarball
   - golang::multi
