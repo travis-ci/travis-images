@@ -1,8 +1,8 @@
 json:
   rvm:
-    default: 1.9.3-p550
+    default: 1.9.3
     rubies:
-      - name: 1.9.3-p550
+      - name: 1.9.3
     gems:
       - bundler
       - rake
