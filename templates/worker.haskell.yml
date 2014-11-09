@@ -1,5 +1,3 @@
 recipes:
   - haskell::multi
   - sweeper
-list_versions_by:
-  - ls /usr/local/ghc

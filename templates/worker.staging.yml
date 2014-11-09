@@ -10,6 +10,3 @@ json:
     gems:
       - bundler
       - rake
-recipes:
-  - rvm
-  - rvm::multi

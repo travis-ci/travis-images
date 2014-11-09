@@ -3,9 +3,3 @@ recipes:
   - python::system
   - python::devshm
   - sweeper
-
-list_versions_by:
-  - ls -l ~travis/virtualenv
-  - sudo -i -u travis python --version
-  - sudo -i -u travis python -c 'import sysconfig; print sysconfig.get_config_vars()'
-  - sudo -u travis bash -i -c 'for p in virtualenv/*.*.*; do echo; source $p/bin/activate; python --version; pip list; done'

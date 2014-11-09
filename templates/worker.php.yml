@@ -5,6 +5,3 @@ recipes:
   - php::multi
   - composer
   - sweeper
-list_versions_by:
-  - sudo -i -u travis phpenv versions
-  - sudo -i -u travis composer --version

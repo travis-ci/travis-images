@@ -16,5 +16,3 @@ json:
 recipes:
   - nodejs::multi
   - sweeper
-list_versions_by:
-  - sudo -i -u travis nvm list

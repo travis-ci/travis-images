@@ -53,6 +53,11 @@ RUBY
           'sudo rm -rf /opt/chef',
           'sudo apt-get clean'
         ]
+
+        SAVE_SYSTEM_INFO = [
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle install"',
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info 2> /dev/null" | sudo tee /usr/share/travis/sytem_info'
+        ]
       end
 
       attr_reader :host
@@ -168,7 +173,7 @@ RUBY
       end
 
       def list_versions
-        run_commands box_config['list_versions_by']
+        run_commands(Commands::SAVE_SYSTEM_INFO)
       end
     end
   end
