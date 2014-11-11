@@ -55,8 +55,9 @@ RUBY
         ]
 
         SAVE_SYSTEM_INFO = [
+          'sudo mkdir -p /usr/share/travis; sudo chown travis:travis /usr/share/travis'
           'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle install"',
-          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info 2> /dev/null" | sudo tee /usr/share/travis/sytem_info'
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info 2> /dev/null" | sudo tee /usr/share/travis/system_info'
         ]
       end
 
