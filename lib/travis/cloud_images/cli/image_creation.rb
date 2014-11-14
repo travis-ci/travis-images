@@ -66,7 +66,7 @@ module Travis
             puts "About to provision the VM using the credential:"
             puts "  travis@#{server.ip_address} #{password}\n\n"
 
-            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist])
+            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist], options[:cookbooks_branch])
 
             puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
             result = provisioner.full_run(options.dup.merge(image_type: image_type)) && provisioner.list_versions
@@ -85,7 +85,7 @@ module Travis
               options["name"],
               image_type,
               Time.now.utc.strftime('%Y-%m-%d-%H-%M'),
-              sha_for_repo('travis-ci/travis-cookbooks', options[:cookbooks_branch])
+              provisioner.sha_for_repo('travis-ci/travis-cookbooks')
             ].compact.join('-')
             provider.save_template(server, desc)
             destroy(hostname)
@@ -258,19 +258,6 @@ module Travis
 
         def servers_with_name(name)
           provider.servers.find_all { |s| s.hostname =~ /^#{name}/ }
-        end
-
-        def sha_for_repo(slug, branch = 'master', length = 7)
-          conn = Faraday.new(:url => "https://api.github.com") do |faraday|
-            faraday.adapter Faraday.default_adapter
-          end
-
-          response = conn.get "/repos/#{slug}/git/refs/heads/#{branch}"
-          data = JSON.parse(response.body)
-
-          data["object"]["sha"][0,length]
-        rescue
-          'f' * length
         end
       end
     end

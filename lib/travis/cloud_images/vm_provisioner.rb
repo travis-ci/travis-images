@@ -56,8 +56,8 @@ RUBY
 
         SAVE_SYSTEM_INFO = [
           'sudo mkdir -p /usr/share/travis; sudo chown travis:travis /usr/share/travis',
-          'sudo -u travis bash -c -l "cd /usr/local/system_info; git pull; bundle install"',
-          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info 2> /dev/null" | sudo tee /usr/share/travis/system_info'
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; git checkout master; git pull; bundle install"',
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info %{cookbooks_sha} 2> /dev/null" | sudo tee /usr/share/travis/system_info'
         ]
       end
 
@@ -65,14 +65,16 @@ RUBY
       attr_reader :log
       attr_reader :box_type
       attr_reader :dist
+      attr_reader :branch
 
-      def initialize(host, user, password, box_type = 'standard', dist = nil)
+      def initialize(host, user, password, box_type = 'standard', dist = nil, branch = 'master')
         @host = host
         @user = user
         @password = password
         @box_type = box_type
         @dist = dist
         @log  = ""
+        @branch = branch
       end
 
       def shell
@@ -174,7 +176,20 @@ RUBY
       end
 
       def list_versions
-        run_commands(Commands::SAVE_SYSTEM_INFO)
+        run_commands(Commands::SAVE_SYSTEM_INFO.map{ |x| x % { cookbooks_sha: sha_for_repo('travis-ci/travis-cookbooks') } })
+      end
+
+      def sha_for_repo(slug, length = 7)
+        conn = Faraday.new(:url => "https://api.github.com") do |faraday|
+          faraday.adapter Faraday.default_adapter
+        end
+
+        response = conn.get "/repos/#{slug}/git/refs/heads/#{branch}"
+        data = JSON.parse(response.body)
+
+        data["object"]["sha"][0,length]
+      rescue
+        'f' * length
       end
     end
   end
