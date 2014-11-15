@@ -57,7 +57,7 @@ RUBY
         SAVE_SYSTEM_INFO = [
           'sudo mkdir -p /usr/share/travis; sudo chown travis:travis /usr/share/travis',
           'sudo -u travis bash -c -l "cd /usr/local/system_info; git checkout master; git pull; bundle install"',
-          'sudo -u travis bash -c -l "cd /usr/local/system_info; bundle exec ./bin/system_info %{cookbooks_sha} 2> /dev/null" | sudo tee /usr/share/travis/system_info'
+          'sudo -u travis bash -c -l "cd /usr/local/system_info; env FORMATS=human,json HUMAN_OUTPUT=/usr/share/travis/system_info JSON_OUTPUT=/usr/share/travis/system_info.json bundle exec ./bin/system_info %{cookbooks_sha} 2> /dev/null"'
         ]
       end
 
