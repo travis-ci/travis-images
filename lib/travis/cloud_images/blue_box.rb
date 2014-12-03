@@ -1,5 +1,6 @@
 require 'fog'
 require 'shellwords'
+require 'travis/cloud_images/cli/image_creation'
 
 module Travis
   module CloudImages
