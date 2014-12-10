@@ -12,7 +12,7 @@ GIT
 
 GIT
   remote: git://github.com/fog/fog.git
-  revision: 0cf4a25de766cbc60935d8e339b1b67b057f0a33
+  revision: 2a391013d0d3a5e029ab9b35f9d9b26d23029553
   specs:
     fog (1.22.1)
       fog-brightbox
@@ -40,7 +40,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (4.1.2)
+    activesupport (4.1.4)
       i18n (~> 0.6, >= 0.6.9)
       json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
