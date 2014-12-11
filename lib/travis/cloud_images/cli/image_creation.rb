@@ -70,7 +70,7 @@ module Travis
             provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist], options[:cookbooks_branch], options['templates_path'])
 
             puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-            result = provisioner.full_run(options.dup.merge(image_type: image_type)) && provisioner.list_versions
+            result = provisioner.full_run(options.dup.merge(image_type: image_type))
             puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
           rescue Exception => e
             puts "Error while creating image"
