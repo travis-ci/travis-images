@@ -24,6 +24,7 @@ module Travis
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
+        class_option :templates_path, :aliases => '-t', :default => './../travis-cookbooks/ci_environment/templates', :desc => 'where travis-cookbooks image templates are located'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
@@ -66,7 +67,7 @@ module Travis
             puts "About to provision the VM using the credential:"
             puts "  travis@#{server.ip_address} #{password}\n\n"
 
-            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist], options[:cookbooks_branch])
+            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist], options[:cookbooks_branch], options['templates_path'])
 
             puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
             result = provisioner.full_run(options.dup.merge(image_type: image_type)) && provisioner.list_versions
