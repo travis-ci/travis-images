@@ -70,7 +70,7 @@ RUBY
         @dist = dist
         @log  = ""
         @branch = branch
-        @templates_path = templates_path
+        @templates_path = File.expand_path(templates_path)
       end
 
       def shell
@@ -147,12 +147,22 @@ RUBY
         clean_up
       end
 
-      def parse_template_config
-        full_path = dist && File.exists?(File.expand_path("#{templates_path}/#{dist}.#{box_type}.yml")) ?
-          File.expand_path("#{templates_path}/.#{dist}.#{box_type}.yml") :
-          File.expand_path("#{templates_path}/.#{box_type}.yml")
-        contents = File.read(full_path)
-        YAML.load(contents)
+      def box_config
+        @box_config ||= parse_template_configs
+      end
+
+      def parse_template_configs
+        configs = [:common, :standard].map { |type| parse_template_config(type) }
+        configs.inject({}) do |result, config|
+          result['json'] = result['json'] || {}).deep_merge(config['json'] || {})
+          result['recipes'] = result['recipes' || []].concat(config['recipes'] || [])
+          result
+        end
+      end
+
+      def parse_template_config(type)
+        path = File.expand_path("#{templates_path}/#{type}/#{box_type}.yml")
+        File.exists?(path) ? YAML.load(File.read(path)) : {}
       end
 
       def create_run_list
@@ -165,10 +175,6 @@ RUBY
         else
           opts[:image_type] != 'standard'
         end
-      end
-
-      def box_config
-        @box_config ||= parse_template_config
       end
 
       def sha_for_repo(slug, length = 7)
