@@ -129,7 +129,7 @@ RUBY
 
       def updated_run_list
         box_config['json'] ||= {}
-
+        box_config['json'].merge!({'system_info' => {'cookbooks_sha' => sha_for_repo('travis-ci/travis-cookbooks')}})
         box_config['json'].merge('run_list' => create_run_list)
       end
 
