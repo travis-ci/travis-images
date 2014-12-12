@@ -148,9 +148,9 @@ RUBY
       end
 
       def parse_template_config
-        full_path = dist && File.exists?(File.expand_path("#{templates_path}/worker.#{dist}.#{box_type}.yml")) ?
-          File.expand_path("#{templates_path}/worker.#{dist}.#{box_type}.yml") :
-          File.expand_path("#{templates_path}/worker.#{box_type}.yml")
+        full_path = dist && File.exists?(File.expand_path("#{templates_path}/#{dist}.#{box_type}.yml")) ?
+          File.expand_path("#{templates_path}/.#{dist}.#{box_type}.yml") :
+          File.expand_path("#{templates_path}/.#{box_type}.yml")
         contents = File.read(full_path)
         YAML.load(contents)
       end
