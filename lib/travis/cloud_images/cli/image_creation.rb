@@ -24,7 +24,7 @@ module Travis
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
-        class_option :templates_path, :aliases => '-t', :default => './../travis-cookbooks/ci_environment/templates', :desc => 'where travis-cookbooks image templates are located'
+        class_option :templates_path, :aliases => '-t', :default => './../travis-cookbooks/vm_templates', :desc => 'where travis-cookbooks image templates are located'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
