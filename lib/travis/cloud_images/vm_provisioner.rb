@@ -154,7 +154,7 @@ RUBY
         configs = [:common, :standard].map { |type| parse_template_config(type) }
         configs.inject({}) do |result, config|
           result['json'] = (result['json'] || {}).deep_merge(config['json'] || {})
-          result['recipes'] = (result['recipes' || []).concat(config['recipes'] || [])
+          result['recipes'] = (result['recipes'] || []).concat(config['recipes'] || [])
           result
         end
       end
