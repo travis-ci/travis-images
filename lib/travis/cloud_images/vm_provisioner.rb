@@ -11,7 +11,6 @@ module Travis
 root = File.expand_path(File.dirname(__FILE__))
 file_cache_path File.join(root, "cache")
 cookbook_path [ "/tmp/vm-provisioning/travis-cookbooks/ci_environment" ]
-log_level :debug
 log_location STDOUT
 verbose_logging false
 RUBY
@@ -32,7 +31,7 @@ RUBY
         INSTALL_CHEF = [
           'mkdir -p /tmp/vm-provisioning',
           'cd /tmp/vm-provisioning',
-          'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 11.8.2-1'
+          'curl -L https://www.opscode.com/chef/install.sh | sudo bash'
         ]
 
         # It is important that there is exactly one
