@@ -31,6 +31,7 @@ module Travis
 
         def destroy
           @server.disassociate_address(ip_address)
+        rescue
           @server.destroy
         end
 
