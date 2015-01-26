@@ -15,4 +15,16 @@ blue_box:
       precise: '1-2-3-4-5'
       trusty: '1-2-3-4-5'
     flavor_id:   '1-2-3-4-5'
-
+open_stack:
+  org:
+    api_key: '0123456789abcdef'
+    username: 'root'
+    auth_url: 'https://example.com/v2.0/tokens'
+    tenant: 'awesome'
+    flavor_id: 'a-b-c-d-e'
+    image_id: 'a-b-c-d-e'
+    key_name: 'keypair_name_known_to_open_stack'
+    key_file_name:
+      - 'path/to/private_key_used_by_keypair'
+    internal_network_id: 'a-b-c-d-e'
+    external_network_id: 'a-b-c-d-e'
