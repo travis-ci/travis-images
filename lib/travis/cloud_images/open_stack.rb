@@ -120,7 +120,7 @@ module Travis
       end
 
       def find_active_template(name)
-        templates.find { |t| t.name == name && t.state == 'ACTIVE' }
+        templates.find { |t| t.name == name && t.status == 'ACTIVE' }
       end
 
       def clean_up
