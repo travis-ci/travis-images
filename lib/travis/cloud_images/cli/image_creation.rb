@@ -51,15 +51,14 @@ module Travis
               image = base_image(options[:base], nil, DEFAULT_DIST)
             end
 
-            description = id = nil
-            case image
-            when Fog::Compute::OpenStack::Image
-              description = image.name
-              id = image.id
-            when Fog::Compute::BlueBox::Image
+            if image.respond_to? :[]
               description = image['descritpion']
               id = image['id']
+            else
+              description = image.name
+              id = image.id
             end
+
             puts "Base image:\n\tdescription: %s\n\tid: %s" % [description, id]
             opts[:image_id] = id
           end
@@ -85,6 +84,7 @@ module Travis
           rescue Exception => e
             puts "Error while creating image"
             puts e.message
+            puts e.backtrace
 
             destroy(hostname)
             return
