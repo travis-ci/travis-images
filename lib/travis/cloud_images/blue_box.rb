@@ -1,5 +1,6 @@
 require 'fog'
 require 'shellwords'
+require 'travis/cloud_images/cli/image_creation'
 
 module Travis
   module CloudImages
@@ -55,18 +56,19 @@ module Travis
       def create_server(opts = {})
         defaults = {
           :username    => 'travis',
-          :image_id    => config.image_id,
+          :image_id    => config.image_id[(opts[:dist] || ::Travis::CloudImages::Cli::ImageCreation::DEFAULT_DIST).to_sym],
           :flavor_id   => config.flavor_id,
           :location_id => config.location_id
         }
-        server = connection.servers.create(defaults.merge(opts))
+        options = defaults.merge(opts)
+        puts "options: #{options}"
+        server = connection.servers.create(options)
         server.wait_for { ready? }
         VirtualMachine.new(server)
       end
 
       def save_template(server, desc)
-        timestamp = Time.now.utc.strftime('%Y-%m-%d-%H-%M')
-        full_desc = "travis-#{desc}-#{timestamp}"
+        full_desc = "travis-#{desc}"
 
         connection.create_template(server.vm_id, :description => full_desc)
 
@@ -75,12 +77,18 @@ module Travis
         end
       end
 
-      def latest_template(type)
-        travis_templates.select { |t| t['description'] =~ /#{type}/ }.sort { |a, b| b['created'] <=> a['created'] }.first
+      def latest_template_matching(regexp)
+        travis_templates.
+          sort_by { |t| t['created'] }.reverse.
+          find { |t| t['description'] =~ Regexp.new(regexp) }
       end
 
-      def latest_template_id(type)
-        latest_template(type)['id']
+      def latest_template(type)
+        latest_template_matching(type)
+      end
+
+      def latest_released_template(type)
+        latest_template_matching("^travis-#{Regexp.quote(type)}")
       end
 
       def templates

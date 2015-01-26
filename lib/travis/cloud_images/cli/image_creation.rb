@@ -8,6 +8,8 @@ require 'digest'
 require 'digest/sha1'
 require 'openssl'
 require 'securerandom'
+require 'faraday'
+require 'json'
 
 $stdout.sync = true
 
@@ -17,69 +19,104 @@ module Travis
       class ImageCreation < Thor
         namespace "travis:images"
 
+        DEFAULT_DIST = 'precise'
         DUP_MATCH_REGEX = /testing-worker-(\w+-\d+-\d+-\d+-\w+-\d+)-(\d+)/
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
+        class_option :templates_path, :aliases => '-t', :default => './../travis-cookbooks/vm_templates', :desc => 'where travis-cookbooks image templates are located'
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
+        method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
+        method_option :keep, :aliases => '-k', :desc => 'In case of build failures, do keep provisioning VM for further inspection'
         def create(image_type = "standard")
-          puts "\nAbout to create and provision #{image_type} template\n\n"
+
+          puts "#{DateTime.now}\nAbout to create and provision #{image_type} template\n\n"
 
           password = generate_password
 
-          opts = { :hostname => "provisioning.#{image_type}" }
+          hostname = ["provisioning", options[:dist], options[:name], image_type].compact.join(".")
+
+          opts = { :hostname => hostname }
+
+          opts[:dist] = options[:dist]
 
           if custom_base_image?(image_type, options[:base])
-            opts[:image_id] = base_image(options[:base])
+            image = base_image(options[:base], options[:name], opts[:dist])
+            unless image
+              puts "Appropriate image with name '#{options[:name]}' was not found."
+              image = base_image(options[:base], nil, DEFAULT_DIST)
+            end
+            puts "Base image:\n\tdescription: %s\n\tid: %s" % [ image['description'], image['id'] ]
+            opts[:image_id] = image['id']
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
 
           opts[:password] = password
 
-          server = provider.create_server(opts)
+          begin
+            server = provider.create_server(opts)
 
-          puts "VM created : "
-          puts "  #{server.inspect}\n\n"
+            puts "VM created : "
+            puts "  #{server.inspect}\n\n"
 
-          puts "About to provision the VM using the credential:"
-          puts "  travis@#{server.ip_address} #{password}\n\n"
+            puts "About to provision the VM using the credential:"
+            puts "  travis@#{server.ip_address} #{password}\n\n"
 
-          provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type)
+            provisioner = VmProvisoner.new(server.ip_address, 'travis', password, image_type, opts[:dist], options[:cookbooks_branch], options['templates_path'])
 
-          puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
-          result = provisioner.full_run(skip_setup?(image_type, options[:base]))
-          puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
+            puts "---------------------- STARTING THE TEMPLATE PROVISIONING ----------------------"
+            result = provisioner.full_run(options.dup.merge(image_type: image_type))
+            puts "---------------------- TEMPLATE PROVISIONING FINISHED ----------------------"
+          rescue Exception => e
+            puts "Error while creating image"
+            puts e.message
 
-          if result
-            desc = [options["name"], image_type].compact.join('-')
-            provider.save_template(server, desc)
-            server.destroy
-            puts "#{image_type} template created!\n\n"
-          else
-            puts "Could not create the #{image_type} template due to a provisioning error\n\n"
+            destroy(hostname)
+            return
           end
 
-          puts "#{server.hostname} VM destroyed"
+          if result
+            desc = [
+              options[:dist],
+              options["name"],
+              image_type,
+              Time.now.utc.strftime('%Y-%m-%d-%H-%M'),
+              provisioner.sha_for_repo('travis-ci/travis-cookbooks')
+            ].compact.join('-')
+            provider.save_template(server, desc)
+            destroy(hostname)
+            puts "#{image_type} template created with descritpion: #{desc}\n\n"
+          else
+            puts "Could not create the #{image_type} template due to a provisioning error\n\n"
+            if options[:keep]
+              puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
+            else
+              destroy(hostname)
+            end
+          end
+
         end
 
 
         desc 'boot [IMAGE_TYPE]', 'Boot a VM for testing, defaults to "ruby"'
         method_option :name, :aliases => '-n', :desc => 'additional naming option as to help idenify booted instances'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
         method_option :ipv6, :default => false, :type => :boolean, :desc => 'boot an ipv6 only vm, only supported by bluebox right now'
         def boot(image_type = 'ruby')
           password = generate_password
 
-          name_addition = [options[:name], image_type].join('-')
+          name_addition = [options[:dist], options[:name], image_type].compact.join('-')
 
           hostname = "debug-#{name_addition}-#{Time.now.to_i}"
 
           opts = {
             :hostname => hostname,
-            :image_id => provider.latest_template_id(image_type)
+            :image_id => provider.latest_template_matching(/^travis-#{name_addition}/)['id']
           }
 
           opts[:ipv6_only] = true if options["ipv6"]
@@ -97,6 +134,10 @@ module Travis
           puts "Connection details are:"
           puts "  ssh travis@#{server.ip_address}"
           puts "  password: #{password}"
+
+        rescue Exception => e
+          puts "Error while booting image: #{e.message}"
+          destroy(hostname)
         end
 
 
@@ -118,10 +159,10 @@ module Travis
 
 
         desc 'clean_up', 'Destroy all left off VMs used for provisioning'
-        def clean_up
-          servers = servers_with_name("provisioning.")
+        def clean_up(servers = nil)
+          servers ||= servers_with_name("provisioning.")
 
-          destroyed = servers.map do |s|
+          destroyed = Array(servers).map do |s|
             s.destroy
             puts "VM '#{s.hostname}' destroyed"
             s
@@ -209,20 +250,11 @@ module Travis
           end
         end
 
-        def base_image(custom_base_name)
-          if custom_base_name
-            provider.latest_template_id(custom_base_name)
-          else
-            provider.latest_template_id('standard')
-          end
-        end
-
-        def skip_setup?(image_type, custom_base_name)
-          if custom_base_name == false
-            false
-          else
-            !standard_image?(image_type)
-          end
+        def base_image(custom_base_name = 'standard', name = nil, dist = nil)
+          custom_base_name ||= 'standard'
+          name_pattern = [dist, name, custom_base_name].compact.join('-')
+          puts "name_pattern: #{name_pattern}"
+          provider.latest_template(name_pattern)
         end
 
         def servers_with_name(name)
