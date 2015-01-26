@@ -94,8 +94,7 @@ module Travis
       end
 
       def save_template(server, desc)
-        timestamp = Time.now.utc.strftime('%Y-%m-%d-%H-%M')
-        full_desc = "travis-#{desc}-#{timestamp}"
+        full_desc = "travis-#{desc}"
 
         image = server.create_image(full_desc)
 
