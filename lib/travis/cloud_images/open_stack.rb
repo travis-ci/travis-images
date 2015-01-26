@@ -67,8 +67,6 @@ module Travis
         user_data += %Q{sudo sed -i 's/PasswordAuthentication no/# PasswordAuthentication no/g' /etc/ssh/sshd_config\n}
         user_data += %Q{sudo service ssh restart}
 
-        puts user_data
-
         server = connection.servers.create(
           name: opts[:hostname],
           flavor_ref: config.flavor_id,
