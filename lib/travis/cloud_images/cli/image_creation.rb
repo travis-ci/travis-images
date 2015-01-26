@@ -50,8 +50,18 @@ module Travis
               puts "Appropriate image with name '#{options[:name]}' was not found."
               image = base_image(options[:base], nil, DEFAULT_DIST)
             end
-            puts "Base image:\n\tdescription: %s\n\tid: %s" % [ image['description'], image['id'] ]
-            opts[:image_id] = image['id']
+
+            description = id = nil
+            case image
+            when Fog::Compute::OpenStack::Image
+              description = image.name
+              id = image.id
+            when Fog::Compute::BlueBox::Image
+              description = image['descritpion']
+              id = image['id']
+            end
+            puts "Base image:\n\tdescription: %s\n\tid: %s" % [description, id]
+            opts[:image_id] = id
           end
 
           puts "Creating a vm with the following options: #{opts.inspect}\n\n"
