@@ -107,8 +107,14 @@ module Travis
         end
       end
 
+      def latest_template_matching(regexp)
+        travis_templates.
+          sort_by { |t| t.created_at }.reverse.
+          find { |t| t.name =~ Regexp.new(regexp) }
+      end
+
       def latest_template(type)
-        travis_templates.select { |t| t.name =~ /^travis-#{type}/ }.sort { |a, b| b.created_at <=> a.created_at }.first || {}
+        latest_template_matching(type)
       end
 
       def latest_template_id(type)
