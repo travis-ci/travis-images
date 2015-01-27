@@ -1,5 +1,6 @@
 require 'fog'
 require 'shellwords'
+require 'timeout'
 
 module Travis
   module CloudImages
@@ -99,8 +100,10 @@ module Travis
 
         image = server.create_image(full_desc)
 
-        while !find_active_template(full_desc)
-          sleep(3)
+        status = Timeout::timeout(1800) do
+          while !find_active_template(full_desc)
+            sleep(3)
+          end
         end
       end
 
