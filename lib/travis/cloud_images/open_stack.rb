@@ -6,20 +6,22 @@ module Travis
   module CloudImages
     class OpenStack
       class VirtualMachine
+        attr_reader :server
+
         def initialize(server)
           @server = server
         end
 
         def vm_id
-          @server.id
+          server.id
         end
 
         def hostname
-          @server.name
+          server.name
         end
 
         def ip_address
-          @server.addresses.values.flatten.detect { |x| x['OS-EXT-IPS:type'] == 'floating' }['addr']
+          server.addresses.values.flatten.detect { |x| x['OS-EXT-IPS:type'] == 'floating' }['addr']
         end
 
         def username
@@ -27,17 +29,16 @@ module Travis
         end
 
         def state
-          @server.state
+          server.state
         end
 
         def destroy
-          @server.disassociate_address(ip_address)
-        rescue
-          @server.destroy
+          server.disassociate_address(ip_address)
+          server.destroy
         end
 
         def create_image(name)
-          @server.create_image(name)
+          server.create_image(name)
         end
       end
 
@@ -93,6 +94,9 @@ module Travis
         end
 
         vm
+
+      rescue
+        clean_up
       end
 
       def save_template(server, desc)
@@ -105,6 +109,9 @@ module Travis
             sleep(3)
           end
         end
+
+      rescue
+        clean_up
       end
 
       def latest_template_matching(regexp)
@@ -134,7 +141,16 @@ module Travis
       end
 
       def clean_up
-        connection.servers.each { |server| server.destroy if server.state == 'ACTIVE' }
+        connection.servers.each do |server|
+          if server.state == 'ACTIVE'
+            server.all_addresses.each do |address|
+              puts address
+              connection.disassociate_address server, address['ip']
+              connection.release_address address['ip']
+            end
+            server.destroy
+          end
+        end
       end
 
       def config
