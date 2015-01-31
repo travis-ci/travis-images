@@ -5,7 +5,7 @@ require 'faraday'
 
 module Travis
   module CloudImages
-    class VmProvisoner
+    class VmProvisioner
       module Assets
         SOLO_RB = <<-RUBY
 root = File.expand_path(File.dirname(__FILE__))
