@@ -1,15 +1,17 @@
 require 'fog'
 require 'shellwords'
 require 'timeout'
+require 'pry'
 
 module Travis
   module CloudImages
     class OpenStack
       class VirtualMachine
-        attr_reader :server
+        attr_reader :server, :connection
 
-        def initialize(server)
+        def initialize(server, connection)
           @server = server
+          @connection = connection
         end
 
         def vm_id
@@ -21,7 +23,7 @@ module Travis
         end
 
         def ip_address
-          server.addresses.values.flatten.detect { |x| x['OS-EXT-IPS:type'] == 'floating' }['addr']
+          server.floating_ip_addresses.first
         end
 
         def username
@@ -33,7 +35,13 @@ module Travis
         end
 
         def destroy
-          server.disassociate_address(ip_address)
+          server.floating_ip_addresses.each do |ip|
+            server.disassociate_address(ip)
+          end
+
+          ip_obj = connection.addresses.detect {|addr| addr.ip == server.floating_ip_address }
+          connection.release_address ip_obj.id
+
           server.destroy
         end
 
@@ -60,7 +68,7 @@ module Travis
       end
 
       def servers
-        connection.servers.map { |server| VirtualMachine.new(server) }
+        connection.servers.map { |server| VirtualMachine.new(server, connection) }
       end
 
       def create_server(opts = {})
@@ -85,33 +93,49 @@ module Travis
 
         connection.associate_address(server.id, ip.body["floating_ip"]["ip"])
 
-        vm = VirtualMachine.new(server.reload)
+        vm = VirtualMachine.new(server.reload, connection)
 
         # VMs are marked as ACTIVE when turned on
         # but they make take awhile to become available via SSH
         retryable(tries: 15, sleep: 6) do
-          ::Net::SSH.start(vm.ip_address, 'ubuntu',{ :keys => config.key_file_name, :paranoid => false }).shell
+          ::Net::SSH.start(vm.ip_address, 'ubuntu',{ :password => opts[:password], :keys => config.key_file_name, :paranoid => false }).shell
         end
 
         vm
 
       rescue
-        clean_up
+        release_ip(server)
       end
 
       def save_template(server, desc)
         full_desc = "travis-#{desc}"
 
-        image = server.create_image(full_desc)
+        response = server.create_image(full_desc)
+
+        image_reponse = response.body['image']
+        image = @connection.images.get(image_reponse['id'])
+
+        sleep_sec = 5
 
         status = Timeout::timeout(1800) do
-          while !find_active_template(full_desc)
-            sleep(3)
+          while !image.ready? do
+            image.reload
+            case image.status
+            when 'DELETED'
+              raise "image #{image.id} has been unexpectedly deleted"
+            when 'ACTIVE'
+              puts "image #{image.id} has been successfully saved"
+              break
+            else
+              puts "sleeping for #{sleep_sec} seconds… Status: #{image.status}"
+              sleep sleep_sec
+            end
           end
         end
-
-      rescue
-        clean_up
+      rescue => e
+        puts e.message
+        puts e.backtrace
+        release_ip(server)
       end
 
       def latest_template_matching(regexp)
@@ -140,19 +164,6 @@ module Travis
         templates.find { |t| t.name == name && t.status == 'ACTIVE' }
       end
 
-      def clean_up
-        connection.servers.each do |server|
-          if server.state == 'ACTIVE'
-            server.all_addresses.each do |address|
-              puts address
-              connection.disassociate_address server, address['ip']
-              connection.release_address address['ip']
-            end
-            server.destroy
-          end
-        end
-      end
-
       def config
         @config ||= Config.new.open_stack[account.to_s]
       end
@@ -171,6 +182,10 @@ module Travis
         end
       end
 
+      def release_ip(server)
+        ip_obj = connection.addresses.detect {|addr| addr.ip == server.server.floating_ip_address }
+        connection.release_address ip_obj.id
+      end
     end
   end
 end

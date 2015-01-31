@@ -12,3 +12,5 @@ gem 'multi_json'
 gem 'thor'
 gem 'hashr'
 gem 'activesupport'
+
+gem 'pry-byebug'
