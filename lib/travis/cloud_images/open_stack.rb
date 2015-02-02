@@ -82,7 +82,7 @@ module Travis
         server = connection.servers.create(
           name: opts[:hostname],
           flavor_ref: config.flavor_id,
-          image_ref: opts[:image_id] || config.image_id,
+          image_ref: config.image_id[(opts[:dist] || ::Travis::CloudImages::Cli::ImageCreation::DEFAULT_DIST).to_sym],
           key_name: config.key_name,
           nics: [{ net_id: config.internal_network_id }],
           user_data: user_data #sudo cp -R /home/ubuntu/.ssh /home/travis/.ssh\nsudo chown -R travis:travis /home/travis/.ssh"
