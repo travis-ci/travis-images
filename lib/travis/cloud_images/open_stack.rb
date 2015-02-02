@@ -85,7 +85,7 @@ module Travis
           image_ref: config.image_id[(opts[:dist] || ::Travis::CloudImages::Cli::ImageCreation::DEFAULT_DIST).to_sym],
           key_name: config.key_name,
           nics: [{ net_id: config.internal_network_id }],
-          user_data: user_data #sudo cp -R /home/ubuntu/.ssh /home/travis/.ssh\nsudo chown -R travis:travis /home/travis/.ssh"
+          user_data: user_data
         )
 
         server.wait_for { ready? }
@@ -103,7 +103,6 @@ module Travis
         end
 
         vm
-
       rescue
         release_ip(server)
       end
@@ -128,7 +127,6 @@ module Travis
               puts "image #{image.id} has been successfully saved"
               break
             else
-              puts "sleeping for #{sleep_sec} seconds… Status: #{image.status}"
               sleep sleep_sec
             end
           end
