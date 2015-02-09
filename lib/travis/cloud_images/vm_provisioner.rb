@@ -31,7 +31,7 @@ RUBY
         INSTALL_CHEF = [
           'mkdir -p /tmp/vm-provisioning',
           'cd /tmp/vm-provisioning',
-          'curl -L https://www.opscode.com/chef/install.sh | sudo bash'
+          'curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -v 11.16.2-1'
         ]
 
         # It is important that there is exactly one
