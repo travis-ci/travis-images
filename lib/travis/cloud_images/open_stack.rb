@@ -132,9 +132,8 @@ module Travis
           end
         end
       rescue => e
-        puts e.message
-        puts e.backtrace
         release_ip(server)
+        raise e # re-raise
       end
 
       def latest_template_matching(regexp)

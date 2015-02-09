@@ -103,13 +103,13 @@ module Travis
             puts "#{image_type} template created with descritpion: #{desc}\n\n"
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
-            if options[:keep]
-              puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
-            else
-              destroy(hostname)
-            end
           end
-
+        ensure
+          if options[:keep]
+            puts "Preserving the provisioning VM\ntravis@#{server.ip_address} #{password}\n\n"
+          else
+            destroy(hostname)
+          end
         end
 
 
