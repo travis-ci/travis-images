@@ -22,6 +22,8 @@ module Travis
         DEFAULT_DIST = 'precise'
         DUP_MATCH_REGEX = /testing-worker-(\w+-\d+-\d+-\d+-\w+-\d+)-(\d+)/
 
+        BASE_IMAGE_NAMES = %w( standard minimal )
+
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
         class_option :templates_path, :aliases => '-t', :default => './../travis-cookbooks/vm_templates', :desc => 'where travis-cookbooks image templates are located'
@@ -256,7 +258,7 @@ module Travis
           elsif custom_base_name == false
             false
           else
-            image_type != 'standard'
+            BASE_IMAGE_NAMES.include? image_type
           end
         end
 
