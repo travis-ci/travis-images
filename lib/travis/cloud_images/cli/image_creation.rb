@@ -258,7 +258,7 @@ module Travis
           elsif custom_base_name == false
             false
           else
-            BASE_IMAGE_NAMES.include? image_type
+            ! BASE_IMAGE_NAMES.include? image_type
           end
         end
 
