@@ -22,7 +22,9 @@ open_stack:
     auth_url: 'https://example.com/v2.0/tokens'
     tenant: 'awesome'
     flavor_id: 'a-b-c-d-e'
-    image_id: 'a-b-c-d-e'
+    image_id:
+      precise: '1-2-3-4-5'
+      trusty: '1-2-3-4-5'
     key_name: 'keypair_name_known_to_open_stack'
     key_file_name:
       - 'path/to/private_key_used_by_keypair'
