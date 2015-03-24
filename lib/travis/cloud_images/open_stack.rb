@@ -35,12 +35,9 @@ module Travis
         end
 
         def destroy
-          server.floating_ip_addresses.each do |ip|
-            server.disassociate_address(ip)
+          if ip_obj = connection.addresses.detect {|addr| addr.ip == server.floating_ip_address }
+            connection.release_address(ip_obj.id)
           end
-
-          ip_obj = connection.addresses.detect {|addr| addr.ip == server.floating_ip_address }
-          connection.release_address ip_obj.id
 
           server.destroy
         end
@@ -74,6 +71,7 @@ module Travis
       def create_server(opts = {})
         user_data  = %Q{#! /bin/bash\nsudo useradd travis -m -s /bin/bash || true\n}
         user_data += %Q{echo travis:#{opts[:password]} | sudo chpasswd\n} if opts[:password]
+        user_data += %Q{sudo sed -i '/travis/d' /etc/sudoers\n}
         user_data += %Q{echo "travis ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers\n}
         user_data += %Q{sudo sed -i '/PasswordAuthentication/ d' /etc/ssh/sshd_config\n}
         user_data += %Q{echo 'PasswordAuthentication yes' | tee -a /etc/ssh/sshd_config\n}
