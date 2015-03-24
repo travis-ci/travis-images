@@ -128,6 +128,7 @@ RUBY
 
       def run_chef
         run_commands([
+          "sudo apt-get update -qq",
           "echo #{Shellwords.escape(MultiJson.encode(updated_run_list))} > /tmp/vm-provisioning/assets/solo.json",
           "sudo chef-solo -c /tmp/vm-provisioning/assets/solo.rb -j /tmp/vm-provisioning/assets/solo.json"
         ])
