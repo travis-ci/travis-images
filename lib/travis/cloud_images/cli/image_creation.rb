@@ -22,7 +22,7 @@ module Travis
         DEFAULT_DIST = 'precise'
         DUP_MATCH_REGEX = /testing-worker-(\w+-\d+-\d+-\d+-\w+-\d+)-(\d+)/
 
-        BASE_IMAGE_NAMES = %w( standard minimal monolith )
+        BASE_IMAGE_NAMES = %w( standard minimal monolith languages )
 
         class_option :provider, :aliases => '-p', :default => 'blue_box', :desc => 'which Cloud VM provider to use'
         class_option :account,  :aliases => '-a', :default => 'org',      :desc => 'which Cloud VM account to use eg. org, pro'
