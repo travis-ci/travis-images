@@ -1,4 +1,5 @@
 language: ruby
+rvm: 2.1.6
 script:
 - git ls-files '*.rb' | xargs -n1 ruby -c
 - ruby -c Gemfile
