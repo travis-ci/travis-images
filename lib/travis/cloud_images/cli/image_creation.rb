@@ -10,6 +10,7 @@ require 'openssl'
 require 'securerandom'
 require 'faraday'
 require 'json'
+require 'yaml'
 
 $stdout.sync = true
 
@@ -30,7 +31,7 @@ module Travis
 
         desc 'create [IMAGE_TYPE]', 'Create and provision a VM, then save the template. Defaults to the "standard" image'
         method_option :name, :aliases => '-n', :desc => 'optional VM naming prefix for the language. eg. travis-[prefix]-language-[date]'
-        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that this image should have.'
         method_option :base, :aliases => '-b', :type => :boolean, :desc => 'override which base image to use'
         method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
         method_option :keep, :aliases => '-k', :desc => 'In case of build failures, do keep provisioning VM for further inspection'
@@ -54,7 +55,7 @@ module Travis
             end
 
             if image.respond_to? :[]
-              description = image['descritpion']
+              description = image['description']
               id = image['id']
             else
               description = image.name
@@ -102,7 +103,7 @@ module Travis
             ].compact.join('-')
             provider.save_template(server, desc)
             destroy(hostname)
-            puts "#{image_type} template created with descritpion: #{desc}\n\n"
+            puts "#{image_type} template created with description: #{desc}\n\n"
           else
             puts "Could not create the #{image_type} template due to a provisioning error\n\n"
           end
@@ -114,10 +115,27 @@ module Travis
           end
         end
 
+        desc 'json [IMAGE_TYPE]', 'Show the Chef JSON for the given image type, defaults to "ruby"'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that this image should have.'
+        method_option :cookbooks_branch, :aliases => '-B', :default => 'master', :desc => 'travis-cookbooks branch name to use; defaults to "master"'
+        method_option :yaml, :aliases => '-Y', type: :boolean, desc: 'dump as YAML, default false'
+        def json(image_type = 'ruby')
+          provisioner = VmProvisioner.new(
+            '127.0.0.1', 'travis', 'travis', image_type,
+            options[:dist],
+            options[:cookbooks_branch],
+            options[:templates_path]
+          )
+          if options[:yaml]
+            puts YAML.dump(provisioner.updated_run_list)
+          else
+            puts MultiJson.encode(provisioner.updated_run_list, pretty: true)
+          end
+        end
 
         desc 'boot [IMAGE_TYPE]', 'Boot a VM for testing, defaults to "ruby"'
         method_option :name, :aliases => '-n', :desc => 'additional naming option as to help idenify booted instances'
-        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that his image should have.'
+        method_option :dist, :aliases => '-d', :desc => 'name of the distribution that this image should have.'
         method_option :ipv6, :default => false, :type => :boolean, :desc => 'boot an ipv6 only vm, only supported by bluebox right now'
         def boot(image_type = 'ruby')
           password = generate_password
