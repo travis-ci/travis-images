@@ -4,3 +4,5 @@ script:
 - git ls-files '*.rb' | xargs -n1 ruby -c
 - ruby -c Gemfile
 - ruby -c Thorfile
+before_install:
+  - gem install rubygems-update -v 3.4.22
